@@ -1,0 +1,28 @@
+<project toolsVersion="5.6">
+  <!-- Import dependencies from Kit SDK to ensure we're using the same versions. -->
+  <import path="../_build/${platform}/${config}/kit/dev/all-deps.packman.xml">
+    <filter include="imgui"/>
+    <filter include="nv_usd_py310_release"/>
+  </import>
+
+  <!-- Override the link paths to point to the correct locations. -->
+  <dependency name="imgui" linkPath="../_build/target-deps/imgui"/>
+  <dependency name="nv_usd_py310_release" linkPath="../_build/target-deps/nv_usd/release"/>
+
+  <!-- Because we always use the release kit-sdk we have to explicitly refer to the debug usd package. -->
+  <dependency name="nv_usd_py310_debug" linkPath="../_build/target-deps/nv_usd/debug">
+      <package name="nv-usd" version="22.11.nv.0.2.49.a42c0222-win64_py310_debug-merge_pxr_22-11-py310" platforms="windows-x86_64"/>
+      <package name="nv-usd" version="22.11.nv.0.2.49.a42c0222-linux64_py310-centos_debug-merge_pxr_22-11-py310" platforms="linux-x86_64" />
+      <package name="nv-usd" version="22.11.nv.0.2.49.a42c0222-linux-aarch64_py310_debug-merge_pxr_22-11-py310" platforms="linux-aarch64" />
+  </dependency>
+
+  <dependency name="tinyxml2" linkPath="../_build/target-deps/tinyxml2">
+      <package name="tinyxml2" version="linux_x64_20200823_2c5a6bf" platforms="linux-x86_64" />
+      <package name="tinyxml2" version="win_x64_20200824_2c5a6bf" platforms="windows-x86_64" />
+  </dependency>
+  <dependency name="assimp" linkPath="../_build/target-deps/assimp">
+      <package name="assimp" version="5.0.0.50.aa41375a-windows-x86_64-release" platforms="windows-x86_64"/>
+      <package name="assimp" version="5.0.0.50.aa41375a-linux-x86_64-release" platforms="linux-x86_64"/>
+  </dependency>
+
+</project>

@@ -1,0 +1,21 @@
+[package]
+title = "MJCF Importer"
+description = "Kit dev app with omni.importer.mjcf extension enabled."
+version = "1.0.0"
+keywords = ["app"]
+
+[dependencies]
+"omni.app.dev" = {}
+"omni.usd.schema.physx" = {}
+"omni.importer.mjcf" = {}
+
+[settings]
+app.window.title = "MJCF Importer"
+app.settings.persistent = true
+
+[settings.app.exts]
+folders.'++' = ["${app}/../exts"] # Make extensions from this repo available.
+
+[settings.persistent.app.stage]
+upAxis = "Z"
+materialStrength = "weakerThanDescendants"
