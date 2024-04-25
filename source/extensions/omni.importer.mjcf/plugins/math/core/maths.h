@@ -1,11 +1,17 @@
-// Copyright (c) 2020-2023, NVIDIA CORPORATION. All rights reserved.
+// SPDX-FileCopyrightText: Copyright (c) 2020-2024, NVIDIA CORPORATION & AFFILIATES. All rights reserved.
+// SPDX-License-Identifier: Apache-2.0
 //
-// NVIDIA CORPORATION and its licensors retain all intellectual property
-// and proprietary rights in and to this software, related documentation
-// and any modifications thereto. Any use, reproduction, disclosure or
-// distribution of this software and related documentation without an express
-// license agreement from NVIDIA CORPORATION is strictly prohibited.
+// Licensed under the Apache License, Version 2.0 (the "License");
+// you may not use this file except in compliance with the License.
+// You may obtain a copy of the License at
 //
+// http://www.apache.org/licenses/LICENSE-2.0
+//
+// Unless required by applicable law or agreed to in writing, software
+// distributed under the License is distributed on an "AS IS" BASIS,
+// WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+// See the License for the specific language governing permissions and
+// limitations under the License.
 
 #pragma once
 
@@ -27,7 +33,6 @@
 #include <cstdlib>
 #include <float.h>
 #include <string.h>
-
 
 struct Transform
 {
@@ -208,7 +213,8 @@ inline float Randf(float max)
     return Randf() * max;
 }
 
-// returns a random unit vector (also can add an offset to generate around an off axis vector)
+// returns a random unit vector (also can add an offset to generate around an
+// off axis vector)
 inline Vec3 RandomUnitVector()
 {
     float phi = Randf(kPi * 2.0f);
@@ -281,7 +287,6 @@ inline void UniformSampleTriangle(float& u, float& v)
     v = Randf() * r;
 }
 
-
 inline Vec3 CosineSampleHemisphere()
 {
     Vec2 s = UniformSampleDisc();
@@ -347,7 +352,6 @@ inline Mat44 ViewMatrix(const Point3& pos)
 
     return Mat44(&view[0][0]);
 }
-
 
 inline Mat44 LookAtMatrix(const Point3& viewer, const Point3& target)
 {
@@ -429,7 +433,6 @@ inline Mat44 OrthographicMatrix(float left, float right, float bottom, float top
                       { 0.0f, 2.0f / (top - bottom), 0.0f, 0.0f },
                       { 0.0f, 0.0f, -2.0f / (f - n), 0.0f },
                       { -(right + left) / (right - left), -(top + bottom) / (top - bottom), -(f + n) / (f - n), 1.0f } };
-
 
     return Mat44(&m[0][0]);
 }
@@ -518,7 +521,8 @@ inline Mat44 TransformMatrix(const Rotation& r, const Point3& p)
     const float s3 = Sin(yaw);
     const float c3 = Cos(yaw);
 
-    // interprets the angles as yaw around world-y, pitch around new z, roll around new x
+    // interprets the angles as yaw around world-y, pitch around new z, roll
+    // around new x
     float mr[4][4] = { { c2 * c3, s2, -c2 * s3, 0.0f },
                        { s1 * s3 - c1 * c3 * s2, c1 * c2, c3 * s1 + c1 * s2 * s3, 0.0f },
                        { c3 * s1 * s2 + c1 * s3, -c2 * s1, c1 * c3 - s1 * s2 * s3, 0.0f },
@@ -528,7 +532,6 @@ inline Mat44 TransformMatrix(const Rotation& r, const Point3& p)
 
     return m1; // m2 * m1;
 }
-
 
 // aligns the z axis along the vector
 inline Rotation AlignToVector(const Vec3& vector)
@@ -596,7 +599,8 @@ T HermiteSecondDerivative(const T& a, const T& b, const T& t1, const T& t2, floa
 
 inline float Log(float base, float x)
 {
-    // calculate the log of a value for an arbitary base, only use if you can't use the standard bases (10, e)
+    // calculate the log of a value for an arbitary base, only use if you can't
+    // use the standard bases (10, e)
     return logf(x) / logf(base);
 }
 
@@ -766,7 +770,8 @@ inline bool operator!=(const Colour& lhs, const Colour& rhs)
 
 inline Colour ToneMap(const Colour& s)
 {
-    // return Colour(s.r / (s.r+1.0f),	s.g / (s.g+1.0f), s.b / (s.b+1.0f), 1.0f);
+    // return Colour(s.r / (s.r+1.0f),	s.g / (s.g+1.0f), s.b /
+    // (s.b+1.0f), 1.0f);
     float Y = 0.3333f * (s.r + s.g + s.b);
     return s / (1.0f + Y);
 }
@@ -897,7 +902,6 @@ inline float SpecularExponentToRoughness(float exponent, float maxExponent = 204
         return 1.0f - logf(exponent) / logf(maxExponent);
 }
 
-
 inline Colour JetColorMap(float low, float high, float x)
 {
     float t = (x - low) / (high - low);
@@ -1003,7 +1007,8 @@ CUDA_CALLABLE inline bool SolveQuadratic(T a, T b, T c, T& minT, T& maxT)
         return false;
     }
 
-    // numerical receipes 5.6 (this method ensures numerical accuracy is preserved)
+    // numerical receipes 5.6 (this method ensures numerical accuracy is
+    // preserved)
     T t = T(-0.5) * (b + Sign(b) * Sqrt(discriminant));
     minT = t / a;
     maxT = c / t;
@@ -1094,7 +1099,8 @@ CUDA_CALLABLE inline bool IntersectRayTriTwoSided(const Vec3& p,
     Vector3 n = Cross(ab, ac);
 
     float d = Dot(-dir, n);
-    float ood = 1.0f / d; // No need to check for division by zero here as infinity aritmetic will save us...
+    float ood = 1.0f / d; // No need to check for division by zero here as
+                          // infinity aritmetic will save us...
     Vector3 ap = p - a;
 
     t = Dot(ap, n) * ood;
@@ -1117,7 +1123,6 @@ CUDA_CALLABLE inline bool IntersectRayTriTwoSided(const Vec3& p,
 
     return true;
 }
-
 
 // mostly taken from Real Time Collision Detection - p192
 inline bool IntersectRayTri(const Point3& p,
@@ -1167,13 +1172,13 @@ inline bool IntersectRayTri(const Point3& p,
     w *= ood;
     u = 1.0f - v - w;
 
-    // optionally write out normal (todo: this branch is a performance concern, should probably remove)
+    // optionally write out normal (todo: this branch is a performance concern,
+    // should probably remove)
     if (normal)
         *normal = n;
 
     return true;
 }
-
 
 // mostly taken from Real Time Collision Detection - p192
 CUDA_CALLABLE inline bool IntersectSegmentTri(const Vec3& p,
@@ -1228,7 +1233,8 @@ CUDA_CALLABLE inline bool IntersectSegmentTri(const Vec3& p,
     w *= ood;
     u = 1.0f - v - w;
 
-    // optionally write out normal (todo: this branch is a performance concern, should probably remove)
+    // optionally write out normal (todo: this branch is a performance concern,
+    // should probably remove)
     if (normal)
         *normal = n;
 
@@ -1240,11 +1246,14 @@ CUDA_CALLABLE inline float ScalarTriple(const Vec3& a, const Vec3& b, const Vec3
     return Dot(Cross(a, b), c);
 }
 
-// intersects a line (through points p and q, against a triangle a, b, c - mostly taken from Real Time Collision
-// Detection - p186
-CUDA_CALLABLE inline bool IntersectLineTri(
-    const Vec3& p, const Vec3& q, const Vec3& a, const Vec3& b, const Vec3& c) //,  float& t, float& u, float& v, float&
-                                                                               // w, Vec3* normal, float expand)
+// intersects a line (through points p and q, against a triangle a, b, c -
+// mostly taken from Real Time Collision Detection - p186
+CUDA_CALLABLE inline bool IntersectLineTri(const Vec3& p,
+                                           const Vec3& q,
+                                           const Vec3& a,
+                                           const Vec3& b,
+                                           const Vec3& c) //,  float& t, float& u, float& v, float&
+                                                          // w, Vec3* normal, float expand)
 {
     const Vec3 pq = q - p;
     const Vec3 pa = a - p;
@@ -1283,7 +1292,6 @@ CUDA_CALLABLE inline Vec3 ClosestPointToAABB(const Vec3& p, const Vec3& lower, c
 
     return c;
 }
-
 
 // RTCD 5.1.5, page 142
 CUDA_CALLABLE inline Vec3 ClosestPointOnTriangle(
@@ -1363,8 +1371,9 @@ CUDA_CALLABLE inline Vec3 ClosestPointOnFatTriangle(
     return x + d * thickness;
 }
 
-// computes intersection between a ray and a triangle expanded by a constant thickness, also works for ray-sphere and
-// ray-capsule this is an iterative method similar to sphere tracing but for convex objects, see
+// computes intersection between a ray and a triangle expanded by a constant
+// thickness, also works for ray-sphere and ray-capsule this is an iterative
+// method similar to sphere tracing but for convex objects, see
 // http://dtecta.com/papers/jgt04raycast.pdf
 CUDA_CALLABLE inline bool IntersectRayFatTriangle(const Vec3& p,
                                                   const Vec3& dir,
@@ -1426,7 +1435,6 @@ CUDA_CALLABLE inline bool IntersectRayFatTriangle(const Vec3& p,
 
     return true;
 }
-
 
 CUDA_CALLABLE inline float SqDistPointSegment(Vec3 a, Vec3 b, Vec3 c)
 {
@@ -1514,7 +1522,6 @@ CUDA_CALLABLE inline void ClosestPointBetweenLineSegments(
         u = Clamp((b - c) / a, 0.0f, 1.0f);
     }
 }
-
 
 CUDA_CALLABLE inline float ClosestPointBetweenLineSegmentAndTri(
     const Vec3& p, const Vec3& q, const Vec3& a, const Vec3& b, const Vec3& c, float& outT, float& outV, float& outW)
@@ -1617,7 +1624,6 @@ CUDA_CALLABLE inline float ClosestPointBetweenLineSegmentAndTri(
     return sqrtf(minDsq);
 }
 
-
 CUDA_CALLABLE inline float minf(const float a, const float b)
 {
     return a < b ? a : b;
@@ -1650,7 +1656,6 @@ CUDA_CALLABLE inline bool IntersectRayAABBFast(
         t = lmin;
     return hit;
 }
-
 
 CUDA_CALLABLE inline bool IntersectRayAABB(
     const Vec3& start, const Vector3& dir, const Vector3& min, const Vector3& max, float& t, Vector3* normal)
@@ -1830,8 +1835,8 @@ public:
     uint32_t m_bottom;
 };
 
-// doesn't really belong here but efficient (and I believe correct) in place random shuffle based on the Fisher-Yates /
-// Knuth algorithm
+// doesn't really belong here but efficient (and I believe correct) in place
+// random shuffle based on the Fisher-Yates / Knuth algorithm
 template <typename T>
 void RandomShuffle(T begin, T end)
 {
@@ -1848,7 +1853,6 @@ void RandomShuffle(T begin, T end)
     }
 }
 
-
 CUDA_CALLABLE inline Quat QuatFromAxisAngle(const Vec3& axis, float angle)
 {
     Vec3 v = Normalize(axis);
@@ -1861,7 +1865,6 @@ CUDA_CALLABLE inline Quat QuatFromAxisAngle(const Vec3& axis, float angle)
 
     return Quat(v.x, v.y, v.z, w);
 }
-
 
 // rotate by quaternion (q, w)
 CUDA_CALLABLE inline Vec3 rotate(const Vec3& q, float w, const Vec3& x)
@@ -1907,7 +1910,6 @@ CUDA_CALLABLE inline Quat GetRotationQuat(const Vec3& _u, const Vec3& _v)
         return Normalize(q);
     }
 }
-
 
 CUDA_CALLABLE inline void TransformBounds(const Quat& q, Vec3 extents, Vec3& newExtents)
 {
@@ -2033,7 +2035,8 @@ inline int PoissonSampleBox3D(Vec3 lower, Vec3 upper, float separation, Vec3* po
     return c;
 }
 
-// Generates an optimally dense sphere packing at the origin (implicit sphere at the origin)
+// Generates an optimally dense sphere packing at the origin (implicit sphere at
+// the origin)
 inline int TightPack3D(float radius, float separation, Vec3* points, int maxPoints)
 {
     int dim = int(ceilf(radius / separation));
@@ -2067,7 +2070,6 @@ inline int TightPack3D(float radius, float separation, Vec3* points, int maxPoin
 
     return c;
 }
-
 
 struct Bounds
 {
@@ -2157,8 +2159,8 @@ CUDA_CALLABLE inline float SurfaceArea(const Bounds& b)
 
 inline void ExtractFrustumPlanes(const Matrix44& m, Plane* planes)
 {
-    // Based on Fast Extraction of Viewing Frustum Planes from the WorldView-Projection Matrix, Gill Grib, Klaus
-    // Hartmann
+    // Based on Fast Extraction of Viewing Frustum Planes from the
+    // WorldView-Projection Matrix, Gill Grib, Klaus Hartmann
 
     // Left clipping plane
     planes[0].x = m(3, 0) + m(0, 0);

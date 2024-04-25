@@ -1,4 +1,4 @@
-// SPDX-FileCopyrightText: Copyright (c) 2023 NVIDIA CORPORATION & AFFILIATES. All rights reserved.
+// SPDX-FileCopyrightText: Copyright (c) 2023-2024, NVIDIA CORPORATION & AFFILIATES. All rights reserved.
 // SPDX-License-Identifier: Apache-2.0
 //
 // Licensed under the Apache License, Version 2.0 (the "License");
@@ -13,22 +13,15 @@
 // See the License for the specific language governing permissions and
 // limitations under the License.
 
-
 #pragma once
 // clang-format off
 #include "UsdPCH.h"
 // clang-format on
 
-// clang-format off
-#include <omni/usd/UtilsIncludes.h>
-#include <omni/usd/UsdUtils.h>
-// clang-format on
-
+#include "Mjcf.h"
 #include "MjcfTypes.h"
 #include "MjcfUtils.h"
-
 #include "math/core/maths.h"
-#include "Mjcf.h"
 
 #include <physxSchema/jointStateAPI.h>
 #include <physxSchema/physxArticulationAPI.h>
@@ -142,6 +135,6 @@ void createJointDrives(pxr::UsdPhysicsJoint jointPrim,
                        const std::string axis,
                        const ImportConfig& config);
 
-}
-}
-}
+} // namespace mjcf
+} // namespace importer
+} // namespace omni

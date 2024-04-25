@@ -1,4 +1,4 @@
-// SPDX-FileCopyrightText: Copyright (c) 2023 NVIDIA CORPORATION & AFFILIATES. All rights reserved.
+// SPDX-FileCopyrightText: Copyright (c) 2023-2024, NVIDIA CORPORATION & AFFILIATES. All rights reserved.
 // SPDX-License-Identifier: Apache-2.0
 //
 // Licensed under the Apache License, Version 2.0 (the "License");
@@ -229,7 +229,6 @@ public:
     Quat principalAxes;
     bool hasFullInertia;
 
-
     MJCFInertial()
     {
         mass = -1.0f;
@@ -249,7 +248,6 @@ enum JointAxis
     eJointAxisSwing1, //!< Corresponds to rotation around the body0 y-axis
     eJointAxisSwing2, //!< Corresponds to rotation around the body0 z-axis
 };
-
 
 class MJCFBody
 {
@@ -305,7 +303,6 @@ public:
         }
     }
 };
-
 
 class MJCFCompiler
 {
@@ -568,7 +565,6 @@ public:
     }
 };
 
-
 class MJCFClass
 {
 public:
@@ -583,7 +579,6 @@ public:
     std::string name;
 };
 
-
 } // namespace mjcf
-}
-}
+} // namespace importer
+} // namespace omni

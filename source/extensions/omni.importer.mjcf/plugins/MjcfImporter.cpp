@@ -1,4 +1,4 @@
-// SPDX-FileCopyrightText: Copyright (c) 2023 NVIDIA CORPORATION & AFFILIATES. All rights reserved.
+// SPDX-FileCopyrightText: Copyright (c) 2023-2024, NVIDIA CORPORATION & AFFILIATES. All rights reserved.
 // SPDX-License-Identifier: Apache-2.0
 //
 // Licensed under the Apache License, Version 2.0 (the "License");
@@ -12,7 +12,6 @@
 // WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
 // See the License for the specific language governing permissions and
 // limitations under the License.
-
 
 #include "MjcfImporter.h"
 
@@ -41,8 +40,8 @@ MJCFImporter::MJCFImporter(const std::string fullPath, ImportConfig& config)
         return;
     }
 
-
-    // if the mjcf file contains <include file="....">, load the included file as well
+    // if the mjcf file contains <include file="....">, load the included file as
+    // well
     {
         tinyxml2::XMLDocument includeDoc;
         tinyxml2::XMLElement* includeElement = root->FirstChildElement("include");
@@ -60,7 +59,6 @@ MJCFImporter::MJCFImporter(const std::string fullPath, ImportConfig& config)
     LoadGlobals(root, defaultClassName, baseDirPath, worldBody, bodies, actuators, tendons, contacts,
                 simulationMeshCache, meshes, materials, textures, compiler, classes, jointToActuatorIdx, config);
 
-
     for (int i = 0; i < int(bodies.size()); ++i)
     {
         populateBodyLookup(bodies[i]);
@@ -71,7 +69,8 @@ MJCFImporter::MJCFImporter(const std::string fullPath, ImportConfig& config)
     if (!createContactGraph())
     {
         CARB_LOG_ERROR(
-            "*** Could not create contact graph to compute collision groups! Are contacts specified properly?\n");
+            "*** Could not create contact graph to compute collision "
+            "groups! Are contacts specified properly?\n");
     }
 
     // loading is complete if it reaches here
@@ -383,7 +382,8 @@ void MJCFImporter::addWorldGeomsAndSites(pxr::UsdStageWeakPtr stage,
                                          const std::string instanceableUsdPath)
 {
 
-    // we have to create a dummy link to place the sites/geoms defined in the world body
+    // we have to create a dummy link to place the sites/geoms defined in the
+    // world body
     std::string dummyPath = rootPath + "/worldBody";
     pxr::UsdPrim dummyLink = pxr::UsdGeomXform::Define(stage, pxr::SdfPath(dummyPath)).GetPrim();
 
@@ -402,7 +402,8 @@ void MJCFImporter::addWorldGeomsAndSites(pxr::UsdStageWeakPtr stage,
         pxr::UsdPhysicsRigidBodyAPI physicsAPI = pxr::UsdPhysicsRigidBodyAPI::Apply(bodyLink);
         pxr::PhysxSchemaPhysxRigidBodyAPI::Apply(bodyLink);
 
-        // createFixedRoot(stage, dummyPath + "/joints/rootJoint_" + uniqueName, dummyPath + "/" + uniqueName);
+        // createFixedRoot(stage, dummyPath + "/joints/rootJoint_" + uniqueName,
+        // dummyPath + "/" + uniqueName);
         physicsAPI.GetKinematicEnabledAttr().Set(true);
 
         bool hasCollisionGeoms = false;
@@ -481,14 +482,12 @@ void MJCFImporter::addWorldGeomsAndSites(pxr::UsdStageWeakPtr stage,
             pxr::UsdPrim prim = createPrimitiveGeom(
                 stage, geomPath, worldBody.geoms[i], simulationMeshCache, config, true, rootPath, false);
 
-
             if (!config.visualizeCollisionGeoms && worldBody.hasVisual && !isVisual)
             {
                 // turn off visibility for collision prim
                 pxr::UsdGeomImageable imageable(prim);
                 imageable.MakeInvisible();
             }
-
 
             // parse material and texture
             if (worldBody.geoms[i]->material != "")
@@ -543,7 +542,6 @@ void MJCFImporter::addWorldGeomsAndSites(pxr::UsdStageWeakPtr stage,
     addVisualSites(stage, dummyLink, &worldBody, dummyPath, config);
 }
 
-
 void MJCFImporter::AddContactFilters(pxr::UsdStageWeakPtr stage)
 {
     // adding collision filtering pairs
@@ -572,7 +570,8 @@ void MJCFImporter::AddTendons(pxr::UsdStageWeakPtr stage, std::string rootPath)
     {
         if (t->type == MJCFTendon::FIXED)
         {
-            // setting the joint with the lowest kinematic hierarchy number as the TendonAxisRoot
+            // setting the joint with the lowest kinematic hierarchy number as the
+            // TendonAxisRoot
             if (t->fixedJoints.size() != 0)
             {
                 MJCFTendon::FixedJoint* rootJoint = t->fixedJoints[0];
@@ -747,7 +746,9 @@ void MJCFImporter::AddTendons(pxr::UsdStageWeakPtr stage, std::string rootPath)
                             {
                                 // we shouldn't be here...
                                 CARB_LOG_ERROR(
-                                    "Error adding attachment %s. Failed to find attached link.\n", name.c_str());
+                                    "Error adding attachment %s. Failed to find "
+                                    "attached link.\n",
+                                    name.c_str());
                             }
                         }
 
@@ -813,13 +814,16 @@ void MJCFImporter::AddTendons(pxr::UsdStageWeakPtr stage, std::string rootPath)
             else
             {
                 CARB_LOG_ERROR(
-                    "Spatial tendon %s cannot be added since it has no attachments specified.", t->name.c_str());
+                    "Spatial tendon %s cannot be added since it has no "
+                    "attachments specified.",
+                    t->name.c_str());
             }
         }
         else
         {
             CARB_LOG_ERROR(
-                "Tendon %s is not a fixed or spatial tendon. Only fixed and spatial tendons are currently supported.",
+                "Tendon %s is not a fixed or spatial tendon. Only fixed "
+                "and spatial tendons are currently supported.",
                 t->name.c_str());
         }
     }
@@ -870,7 +874,9 @@ void MJCFImporter::CreateInstanceableMeshes(pxr::UsdStageRefPtr stage,
 
     if ((!createBodyForFixedJoint) && ((body->joints.size() == 0) && (!isRoot)))
     {
-        CARB_LOG_WARN("RigidBodySpec with no joint will have no geometry for now, to avoid instability of fixed joint!");
+        CARB_LOG_WARN(
+            "RigidBodySpec with no joint will have no geometry for now, "
+            "to avoid instability of fixed joint!");
     }
     else
     {
@@ -920,7 +926,6 @@ void MJCFImporter::CreateInstanceableMeshes(pxr::UsdStageRefPtr stage,
     }
 }
 
-
 void MJCFImporter::CreatePhysicsBodyAndJoint(pxr::UsdStageWeakPtr stage,
                                              MJCFBody* body,
                                              std::string rootPrimPath,
@@ -936,7 +941,9 @@ void MJCFImporter::CreatePhysicsBodyAndJoint(pxr::UsdStageWeakPtr stage,
 
     if ((!createBodyForFixedJoint) && ((body->joints.size() == 0) && (!isRoot)))
     {
-        CARB_LOG_WARN("RigidBodySpec with no joint will have no geometry for now, to avoid instability of fixed joint!");
+        CARB_LOG_WARN(
+            "RigidBodySpec with no joint will have no geometry for now, "
+            "to avoid instability of fixed joint!");
     }
     else
     {
@@ -1100,7 +1107,8 @@ void MJCFImporter::CreatePhysicsBodyAndJoint(pxr::UsdStageWeakPtr stage,
                                      config.distanceScale);
                     applyPhysxJoint(jointPrim, joint);
 
-                    // joint was aligned such that its hinge axis is aligned with local x-axis.
+                    // joint was aligned such that its hinge axis is aligned with local
+                    // x-axis.
                     jointPrim.CreateAxisAttr().Set(pxr::UsdPhysicsTokens->x);
 
                     if (joint->limited)
@@ -1126,7 +1134,8 @@ void MJCFImporter::CreatePhysicsBodyAndJoint(pxr::UsdStageWeakPtr stage,
                                      config.distanceScale);
                     applyPhysxJoint(jointPrim, joint);
 
-                    // joint was aligned such that its hinge axis is aligned with local x-axis.
+                    // joint was aligned such that its hinge axis is aligned with local
+                    // x-axis.
                     jointPrim.CreateAxisAttr().Set(pxr::UsdPhysicsTokens->x);
 
                     if (joint->limited)
@@ -1167,7 +1176,9 @@ void MJCFImporter::CreatePhysicsBodyAndJoint(pxr::UsdStageWeakPtr stage,
                 }
                 else
                 {
-                    CARB_LOG_WARN("*** Only hinge, slide, ball, and free joints are supported by MJCF importer");
+                    CARB_LOG_WARN(
+                        "*** Only hinge, slide, ball, and free joints are "
+                        "supported by MJCF importer");
                 }
             }
             else
@@ -1178,8 +1189,8 @@ void MJCFImporter::CreatePhysicsBodyAndJoint(pxr::UsdStageWeakPtr stage,
                     stage, jointPath, poseJointToParentBody, poseJointToChildBody, parentBodyPath, bodyPath, config);
                 applyPhysxJoint(jointPrim, body->joints[0]);
 
-                // TODO: this needs to be updated to support all joint types and combinations
-                // set joint limits
+                // TODO: this needs to be updated to support all joint types and
+                // combinations set joint limits
                 for (int jid = 0; jid < (int)body->joints.size(); jid++)
                 {
                     // all locked
@@ -1190,7 +1201,9 @@ void MJCFImporter::CreatePhysicsBodyAndJoint(pxr::UsdStageWeakPtr stage,
 
                     if (body->joints[jid]->type != MJCFJoint::HINGE && body->joints[jid]->type != MJCFJoint::SLIDE)
                     {
-                        CARB_LOG_WARN("*** Only hinge and slide joints are supported by MJCF importer");
+                        CARB_LOG_WARN(
+                            "*** Only hinge and slide joints are supported by "
+                            "MJCF importer");
                         continue;
                     }
 
@@ -1414,7 +1427,7 @@ void MJCFImporter::computeKinematicHierarchy()
 
     while (bodyQueue.size() != 0)
     {
-        num_bodies_at_level = bodyQueue.size();
+        num_bodies_at_level = (int)bodyQueue.size();
 
         for (int i = 0; i < num_bodies_at_level; i++)
         {
@@ -1435,6 +1448,6 @@ void MJCFImporter::computeKinematicHierarchy()
     }
 }
 
-}
-}
-}
+} // namespace mjcf
+} // namespace importer
+} // namespace omni

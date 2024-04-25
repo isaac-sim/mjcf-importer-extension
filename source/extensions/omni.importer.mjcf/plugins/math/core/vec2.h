@@ -1,11 +1,17 @@
-// Copyright (c) 2020-2022, NVIDIA CORPORATION. All rights reserved.
+// SPDX-FileCopyrightText: Copyright (c) 2020-2024, NVIDIA CORPORATION & AFFILIATES. All rights reserved.
+// SPDX-License-Identifier: Apache-2.0
 //
-// NVIDIA CORPORATION and its licensors retain all intellectual property
-// and proprietary rights in and to this software, related documentation
-// and any modifications thereto. Any use, reproduction, disclosure or
-// distribution of this software and related documentation without an express
-// license agreement from NVIDIA CORPORATION is strictly prohibited.
+// Licensed under the Apache License, Version 2.0 (the "License");
+// you may not use this file except in compliance with the License.
+// You may obtain a copy of the License at
 //
+// http://www.apache.org/licenses/LICENSE-2.0
+//
+// Unless required by applicable law or agreed to in writing, software
+// distributed under the License is distributed on an "AS IS" BASIS,
+// WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+// See the License for the specific language governing permissions and
+// limitations under the License.
 
 #pragma once
 
@@ -45,7 +51,6 @@
 #else
 #    define FLOAT_VALIDATE(f)
 #endif
-
 
 // vec2
 template <typename T>
@@ -195,7 +200,6 @@ CUDA_CALLABLE bool operator==(const XVector2<T>& lhs, const XVector2<T>& rhs)
     return (lhs.x == rhs.x && lhs.y == rhs.y);
 }
 
-
 template <typename T>
 CUDA_CALLABLE T Dot(const XVector2<T>& v1, const XVector2<T>& v2)
 {
@@ -228,7 +232,8 @@ CUDA_CALLABLE XVector2<T> Min(const XVector2<T>& a, const XVector2<T>& b)
     return XVector2<T>(Min(a.x, b.x), Min(a.y, b.y));
 }
 
-// 2d cross product, treat as if a and b are in the xy plane and return magnitude of z
+// 2d cross product, treat as if a and b are in the xy plane and return
+// magnitude of z
 template <typename T>
 CUDA_CALLABLE T Cross(const XVector2<T>& a, const XVector2<T>& b)
 {

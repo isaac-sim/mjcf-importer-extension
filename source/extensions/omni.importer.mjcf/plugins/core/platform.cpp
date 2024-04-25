@@ -1,11 +1,17 @@
-// Copyright (c) 2022-2023, NVIDIA CORPORATION. All rights reserved.
+// SPDX-FileCopyrightText: Copyright (c) 2022-2024, NVIDIA CORPORATION & AFFILIATES. All rights reserved.
+// SPDX-License-Identifier: Apache-2.0
 //
-// NVIDIA CORPORATION and its licensors retain all intellectual property
-// and proprietary rights in and to this software, related documentation
-// and any modifications thereto. Any use, reproduction, disclosure or
-// distribution of this software and related documentation without an express
-// license agreement from NVIDIA CORPORATION is strictly prohibited.
+// Licensed under the Apache License, Version 2.0 (the "License");
+// you may not use this file except in compliance with the License.
+// You may obtain a copy of the License at
 //
+// http://www.apache.org/licenses/LICENSE-2.0
+//
+// Unless required by applicable law or agreed to in writing, software
+// distributed under the License is distributed on an "AS IS" BASIS,
+// WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+// See the License for the specific language governing permissions and
+// limitations under the License.
 
 #include "platform.h"
 
@@ -64,7 +70,6 @@ void Sleep(double seconds)
     ::Sleep(DWORD(seconds * 1000));
 }
 
-
 //// helper function to get exe path
 // string GetExePath()
 //{
@@ -95,8 +100,8 @@ void Sleep(double seconds)
 //	ofn.lpstrFilter = filter;
 //	ofn.lpstrFile = fileName;
 //	ofn.nMaxFile = MAX_PATH;
-//	ofn.Flags = OFN_EXPLORER | OFN_FILEMUSTEXIST | OFN_HIDEREADONLY | OFN_NOCHANGEDIR;
-//	ofn.lpstrDefExt = "";
+//	ofn.Flags = OFN_EXPLORER | OFN_FILEMUSTEXIST | OFN_HIDEREADONLY |
+// OFN_NOCHANGEDIR; 	ofn.lpstrDefExt = "";
 //
 //	string fileNameStr;
 //
@@ -124,7 +129,8 @@ void Sleep(double seconds)
 //	{
 //		do
 //		{
-//			if (!(strcmp(info.cFileName, ".") == 0 || strcmp(info.cFileName, "..") == 0))
+//			if (!(strcmp(info.cFileName, ".") == 0 ||
+// strcmp(info.cFileName, "..") == 0))
 //			{
 //				files.push_back(info.cFileName);
 //			}
@@ -145,7 +151,6 @@ void Sleep(double seconds)
 //
 //	return true;
 //}
-
 
 #else
 
@@ -173,7 +178,6 @@ double GetSeconds()
 }
 
 #endif
-
 
 uint8_t* LoadFileToBuffer(const char* filename, uint32_t* sizeRead)
 {
@@ -206,7 +210,8 @@ uint8_t* LoadFileToBuffer(const char* filename, uint32_t* sizeRead)
 string LoadFileToString(const char* filename)
 {
     // std::ifstream file(filename);
-    // return string((std::istreambuf_iterator<char>(file)), std::istreambuf_iterator<char>());
+    // return string((std::istreambuf_iterator<char>(file)),
+    // std::istreambuf_iterator<char>());
     uint32_t size;
     uint8_t* buf = LoadFileToBuffer(filename, &size);
 
@@ -239,7 +244,6 @@ bool SaveStringToFile(const char* filename, const char* s)
         return true;
     }
 }
-
 
 string StripFilename(const char* path)
 {

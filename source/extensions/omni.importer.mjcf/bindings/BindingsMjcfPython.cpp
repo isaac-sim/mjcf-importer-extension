@@ -1,14 +1,20 @@
-// Copyright (c) 2022-2023, NVIDIA CORPORATION. All rights reserved.
+// SPDX-FileCopyrightText: Copyright (c) 2022-2024, NVIDIA CORPORATION & AFFILIATES. All rights reserved.
+// SPDX-License-Identifier: Apache-2.0
 //
-// NVIDIA CORPORATION and its licensors retain all intellectual property
-// and proprietary rights in and to this software, related documentation
-// and any modifications thereto. Any use, reproduction, disclosure or
-// distribution of this software and related documentation without an express
-// license agreement from NVIDIA CORPORATION is strictly prohibited.
+// Licensed under the Apache License, Version 2.0 (the "License");
+// you may not use this file except in compliance with the License.
+// You may obtain a copy of the License at
 //
-#include <carb/BindingsPythonUtils.h>
-
+// http://www.apache.org/licenses/LICENSE-2.0
+//
+// Unless required by applicable law or agreed to in writing, software
+// distributed under the License is distributed on an "AS IS" BASIS,
+// WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+// See the License for the specific language governing permissions and
+// limitations under the License.
 #include "../plugins/Mjcf.h"
+
+#include <carb/BindingsPythonUtils.h>
 
 CARB_BINDINGS("omni.importer.mjcf.python")
 
@@ -18,10 +24,9 @@ namespace importer
 {
 namespace mjcf
 {
-
 }
-}
-}
+} // namespace importer
+} // namespace omni
 
 namespace
 {
@@ -53,7 +58,6 @@ PYBIND11_MODULE(_mjcf, m)
         Refer to the sample documentation for more examples and usage
                 )pbdoc";
 
-
     py::class_<ImportConfig>(m, "ImportConfig")
         .def(py::init<>())
         .def_readwrite("merge_fixed_joints", &ImportConfig::mergeFixedJoints,
@@ -61,29 +65,33 @@ PYBIND11_MODULE(_mjcf, m)
         .def_readwrite("convex_decomp", &ImportConfig::convexDecomp,
                        "Decompose a convex mesh into smaller pieces for a closer fit")
         .def_readwrite("import_inertia_tensor", &ImportConfig::importInertiaTensor,
-                       "Import inertia tensor from mjcf, if not specified in mjcf it will import as identity")
+                       "Import inertia tensor from mjcf, if not specified in "
+                       "mjcf it will import as identity")
         .def_readwrite("fix_base", &ImportConfig::fixBase, "Create fix joint for base link")
         .def_readwrite("self_collision", &ImportConfig::selfCollision, "Self collisions between links in the articulation")
         .def_readwrite("density", &ImportConfig::density, "default density used for links")
-        //.def_readwrite("default_drive_type", &ImportConfig::defaultDriveType, "default drive type used for joints")
+        //.def_readwrite("default_drive_type", &ImportConfig::defaultDriveType,
+        //"default drive type used for joints")
         .def_readwrite(
             "default_drive_strength", &ImportConfig::defaultDriveStrength, "default drive stiffness used for joints")
         .def_readwrite("distance_scale", &ImportConfig::distanceScale,
                        "Set the unit scaling factor, 1.0 means meters, 100.0 means cm")
-        //.def_readwrite("up_vector", &ImportConfig::upVector, "Up vector used for import")
+        //.def_readwrite("up_vector", &ImportConfig::upVector, "Up vector used for
+        // import")
         .def_readwrite(
             "create_physics_scene", &ImportConfig::createPhysicsScene, "add a physics scene to the stage on import")
         .def_readwrite("make_default_prim", &ImportConfig::makeDefaultPrim, "set imported robot as default prim")
         .def_readwrite(
             "create_body_for_fixed_joint", &ImportConfig::createBodyForFixedJoint, "creates body for fixed joint")
-        .def_readwrite(
-            "override_com", &ImportConfig::overrideCoM,
-            "whether to compute the center of mass from geometry and override values given in the original asset")
-        .def_readwrite(
-            "override_inertia_tensor", &ImportConfig::overrideInertia,
-            "Whether to compute the inertia tensor from geometry and override values given in the original asset")
+        .def_readwrite("override_com", &ImportConfig::overrideCoM,
+                       "whether to compute the center of mass from geometry and "
+                       "override values given in the original asset")
+        .def_readwrite("override_inertia_tensor", &ImportConfig::overrideInertia,
+                       "Whether to compute the inertia tensor from geometry and "
+                       "override values given in the original asset")
         .def_readwrite("make_instanceable", &ImportConfig::makeInstanceable,
-                       "Creates an instanceable version of the asset. All meshes will be placed in a separate USD file")
+                       "Creates an instanceable version of the asset. All meshes "
+                       "will be placed in a separate USD file")
         .def_readwrite(
             "instanceable_usd_path", &ImportConfig::instanceableMeshUsdPath, "USD file to store instanceable mehses in")
 
@@ -97,14 +105,15 @@ PYBIND11_MODULE(_mjcf, m)
         .def("set_density", [](ImportConfig& config, const float value) { config.density = value; })
         /*        .def("set_default_drive_type",
                      [](ImportConfig& config, const int value) {
-                         config.defaultDriveType = static_cast<UrdfJointTargetType>(value);
+                         config.defaultDriveType =
+           static_cast<UrdfJointTargetType>(value);
                      })*/
         .def("set_default_drive_strength",
              [](ImportConfig& config, const float value) { config.defaultDriveStrength = value; })
         .def("set_distance_scale", [](ImportConfig& config, const float value) { config.distanceScale = value; })
         /*        .def("set_up_vector",
-                     [](ImportConfig& config, const float x, const float y, const float z) {
-                         config.upVector = { x, y, z };
+                     [](ImportConfig& config, const float x, const float y, const
+           float z) { config.upVector = { x, y, z };
                      })*/
         .def("set_create_physics_scene",
              [](ImportConfig& config, const bool value) { config.createPhysicsScene = value; })
@@ -137,4 +146,4 @@ PYBIND11_MODULE(_mjcf, m)
 
                 )pbdoc");
 }
-}
+} // namespace

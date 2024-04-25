@@ -1,4 +1,4 @@
-// SPDX-FileCopyrightText: Copyright (c) 2023 NVIDIA CORPORATION & AFFILIATES. All rights reserved.
+// SPDX-FileCopyrightText: Copyright (c) 2023-2024, NVIDIA CORPORATION & AFFILIATES. All rights reserved.
 // SPDX-License-Identifier: Apache-2.0
 //
 // Licensed under the Apache License, Version 2.0 (the "License");
@@ -16,6 +16,7 @@
 #pragma once
 
 #include "math/core/maths.h"
+
 #include <tinyxml2.h>
 
 namespace omni
@@ -42,7 +43,6 @@ void getAngleAxisIfExist(tinyxml2::XMLElement* e, const char* aname, Quat& q, bo
 Quat indexedRotation(int axis, float s, float c);
 Vec3 Diagonalize(const Matrix33& m, Quat& massFrame);
 
-
-}
-}
-}
+} // namespace mjcf
+} // namespace importer
+} // namespace omni

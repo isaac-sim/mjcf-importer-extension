@@ -1,11 +1,17 @@
-// Copyright (c) 2020-2022, NVIDIA CORPORATION. All rights reserved.
+// SPDX-FileCopyrightText: Copyright (c) 2020-2024, NVIDIA CORPORATION & AFFILIATES. All rights reserved.
+// SPDX-License-Identifier: Apache-2.0
 //
-// NVIDIA CORPORATION and its licensors retain all intellectual property
-// and proprietary rights in and to this software, related documentation
-// and any modifications thereto. Any use, reproduction, disclosure or
-// distribution of this software and related documentation without an express
-// license agreement from NVIDIA CORPORATION is strictly prohibited.
+// Licensed under the Apache License, Version 2.0 (the "License");
+// you may not use this file except in compliance with the License.
+// You may obtain a copy of the License at
 //
+// http://www.apache.org/licenses/LICENSE-2.0
+//
+// Unless required by applicable law or agreed to in writing, software
+// distributed under the License is distributed on an "AS IS" BASIS,
+// WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+// See the License for the specific language governing permissions and
+// limitations under the License.
 
 #pragma once
 
@@ -161,7 +167,6 @@ CUDA_CALLABLE inline Matrix33 InverseDouble(const Matrix33& a, bool& success)
         for (int j = 0; j < 3; ++j)
             m[i][j] = a(i, j);
 
-
     double det = m[0][0] * (m[2][2] * m[1][1] - m[2][1] * m[1][2]) - m[1][0] * (m[2][2] * m[0][1] - m[2][1] * m[0][2]) +
                  m[2][0] * (m[1][2] * m[0][1] - m[1][1] * m[0][2]);
 
@@ -204,7 +209,6 @@ CUDA_CALLABLE inline Matrix33 InverseDouble(const Matrix33& a, bool& success)
         return out;
     }
 }
-
 
 CUDA_CALLABLE inline Matrix33 operator*(float s, const Matrix33& a)
 {
@@ -307,7 +311,6 @@ CUDA_CALLABLE inline XQuat<T>::XQuat(const Matrix33& m)
 
     *this = Normalize(*this);
 }
-
 
 CUDA_CALLABLE inline void quat2Mat(const XQuat<float>& q, Matrix33& m)
 {

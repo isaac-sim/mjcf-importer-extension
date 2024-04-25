@@ -1,11 +1,17 @@
-// Copyright (c) 2022-2023, NVIDIA CORPORATION. All rights reserved.
+// SPDX-FileCopyrightText: Copyright (c) 2022-2024, NVIDIA CORPORATION & AFFILIATES. All rights reserved.
+// SPDX-License-Identifier: Apache-2.0
 //
-// NVIDIA CORPORATION and its licensors retain all intellectual property
-// and proprietary rights in and to this software, related documentation
-// and any modifications thereto. Any use, reproduction, disclosure or
-// distribution of this software and related documentation without an express
-// license agreement from NVIDIA CORPORATION is strictly prohibited.
+// Licensed under the Apache License, Version 2.0 (the "License");
+// you may not use this file except in compliance with the License.
+// You may obtain a copy of the License at
 //
+// http://www.apache.org/licenses/LICENSE-2.0
+//
+// Unless required by applicable law or agreed to in writing, software
+// distributed under the License is distributed on an "AS IS" BASIS,
+// WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+// See the License for the specific language governing permissions and
+// limitations under the License.
 
 #pragma once
 
@@ -60,7 +66,6 @@ public:
         return data[col][row];
     }
 
-
     void SetIdentity()
     {
         for (int i = 0; i < m; ++i)
@@ -88,7 +93,6 @@ XMatrix<m, n, T> operator-(const XMatrix<m, n, T>& lhs, const XMatrix<m, n, T>& 
         for (int j = 0; j < n; ++j)
             d(i, j) = lhs(i, j) - rhs(i, j);
 
-
     return d;
 }
 
@@ -101,10 +105,8 @@ XMatrix<m, n, T> operator+(const XMatrix<m, n, T>& lhs, const XMatrix<m, n, T>& 
         for (int j = 0; j < n; ++j)
             d(i, j) = lhs(i, j) + rhs(i, j);
 
-
     return d;
 }
-
 
 template <int m, int n, int o, typename T>
 XMatrix<m, o> Multiply(const XMatrix<m, n, T>& lhs, const XMatrix<n, o, T>& rhs)
@@ -129,7 +131,6 @@ XMatrix<m, o> Multiply(const XMatrix<m, n, T>& lhs, const XMatrix<n, o, T>& rhs)
     return ret;
 }
 
-
 template <int m, int n>
 XMatrix<n, m> Transpose(const XMatrix<m, n>& a)
 {
@@ -145,7 +146,6 @@ XMatrix<n, m> Transpose(const XMatrix<m, n>& a)
 
     return ret;
 }
-
 
 // matrix to swap row i and j when multiplied on the right
 template <int n>
@@ -267,7 +267,8 @@ T Determinant(const XMatrix<n, n, T>& A, XMatrix<n, n, T>& L, XMatrix<n, n, T>& 
 {
     U = LU(A, L);
 
-    // determinant is the product of diagonal entries of U (assume L has 1s on diagonal)
+    // determinant is the product of diagonal entries of U (assume L has 1s on
+    // diagonal)
     T det = 1.0;
     for (int i = 0; i < n; ++i)
         det *= U(i, i);

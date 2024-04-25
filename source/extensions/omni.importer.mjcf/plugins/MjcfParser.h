@@ -1,4 +1,4 @@
-// SPDX-FileCopyrightText: Copyright (c) 2023 NVIDIA CORPORATION & AFFILIATES. All rights reserved.
+// SPDX-FileCopyrightText: Copyright (c) 2023-2024, NVIDIA CORPORATION & AFFILIATES. All rights reserved.
 // SPDX-License-Identifier: Apache-2.0
 //
 // Licensed under the Apache License, Version 2.0 (the "License");
@@ -15,13 +15,12 @@
 
 #pragma once
 
-#include "MjcfTypes.h"
 #include "Mjcf.h"
+#include "MjcfTypes.h"
 #include "math/core/maths.h"
 
 #include <map>
 #include <tinyxml2.h>
-
 
 namespace omni
 {
@@ -116,6 +115,6 @@ void LoadGlobals(tinyxml2::XMLElement* root,
                  std::map<std::string, int>& jointToActuatorIdx,
                  ImportConfig& config);
 
-}
-}
-}
+} // namespace mjcf
+} // namespace importer
+} // namespace omni

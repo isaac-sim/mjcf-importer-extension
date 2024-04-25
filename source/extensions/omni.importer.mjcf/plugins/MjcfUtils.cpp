@@ -1,4 +1,4 @@
-// SPDX-FileCopyrightText: Copyright (c) 2023 NVIDIA CORPORATION & AFFILIATES. All rights reserved.
+// SPDX-FileCopyrightText: Copyright (c) 2023-2024, NVIDIA CORPORATION & AFFILIATES. All rights reserved.
 // SPDX-License-Identifier: Apache-2.0
 //
 // Licensed under the Apache License, Version 2.0 (the "License");
@@ -13,8 +13,8 @@
 // See the License for the specific language governing permissions and
 // limitations under the License.
 
-
 #include "MjcfUtils.h"
+
 #include "math/core/maths.h"
 
 namespace omni
@@ -176,7 +176,7 @@ void getEulerIfExist(tinyxml2::XMLElement* e, const char* aname, Quat& q, std::s
         float angles[3] = { a, b, c };
         q = Quat();
 
-        for (int i = eulerseq.length() - 1; i >= 0; i--)
+        for (int i = (int)eulerseq.length() - 1; i >= 0; i--)
         {
             char axis = eulerseq[i];
             Quat new_quat = Quat();
@@ -197,7 +197,8 @@ void getEulerIfExist(tinyxml2::XMLElement* e, const char* aname, Quat& q, std::s
             }
             else
             {
-                std::cout << "The MJCF importer currently only supports euler sequences consisting of {x, y, z}"
+                std::cout << "The MJCF importer currently only supports euler "
+                             "sequences consisting of {x, y, z}"
                           << std::endl;
             }
 
@@ -224,7 +225,6 @@ void getAngleAxisIfExist(tinyxml2::XMLElement* e, const char* aname, Quat& q, bo
     }
 }
 
-
 void getZAxisIfExist(tinyxml2::XMLElement* e, const char* aname, Quat& q)
 {
     const char* st = e->Attribute(aname);
@@ -245,13 +245,12 @@ void getZAxisIfExist(tinyxml2::XMLElement* e, const char* aname, Quat& q)
             rotVec = Normalize(rotVec);
         }
 
-        // essentially doing dot product between (0, 0, 1) and the vector and taking arccos to
-        // obtain the angle between the two vectors
+        // essentially doing dot product between (0, 0, 1) and the vector and taking
+        // arccos to obtain the angle between the two vectors
         float angle = acos(new_zaxis.z);
         q = QuatFromAxisAngle(rotVec, angle);
     }
 }
-
 
 void QuatFromZAxis(Vec3 zaxis, Quat& q)
 {
@@ -267,12 +266,11 @@ void QuatFromZAxis(Vec3 zaxis, Quat& q)
         rotVec = Normalize(rotVec);
     }
 
-    // essentially doing dot product between (0, 0, 1) and the vector and taking arccos to
-    // obtain the angle between the two vectors
+    // essentially doing dot product between (0, 0, 1) and the vector and taking
+    // arccos to obtain the angle between the two vectors
     float angle = acos(new_zaxis.z);
     q = QuatFromAxisAngle(rotVec, angle);
 }
-
 
 Quat indexedRotation(int axis, float s, float c)
 {
@@ -317,7 +315,8 @@ Vec3 Diagonalize(const Matrix33& m, Quat& massFrame)
             float t = 1 / (absw + Sqrt(w * w + 1)); // absolute value of tan phi
             float h = 1 / Sqrt(t * t + 1); // absolute value of cos phi
 
-            assert(h != 1); // |w|<1000 guarantees this with typical IEEE754 machine eps (approx 6e-8)
+            assert(h != 1); // |w|<1000 guarantees this with typical IEEE754 machine
+                            // eps (approx 6e-8)
             r = indexedRotation(a, Sqrt((1 - h) / 2) * Sign(w), Sqrt((1 + h) / 2));
         }
 
@@ -327,7 +326,6 @@ Vec3 Diagonalize(const Matrix33& m, Quat& massFrame)
     return Vec3(d.cols[0].x, d.cols[1].y, d.cols[2].z);
 }
 
-
-}
-}
-}
+} // namespace mjcf
+} // namespace importer
+} // namespace omni

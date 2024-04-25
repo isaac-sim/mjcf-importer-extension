@@ -65,7 +65,6 @@ project_ext_plugin(ext, "omni.importer.mjcf.plugin")
         "%{root}/_build/target-deps/pybind11/include",
         "%{root}/_build/target-deps/nv_usd/%{cfg.buildcfg}/include",
         "%{root}/_build/target-deps/usd_ext_physics/%{cfg.buildcfg}/include",
-        "%{root}/_build/target-deps/rtx_plugins/include",
         "%{root}/_build/target-deps/assimp/include",
         "%{root}/_build/target-deps/python/include",
         "%{root}/_build/target-deps/tinyxml2/include",

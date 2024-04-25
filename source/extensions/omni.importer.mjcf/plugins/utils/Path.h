@@ -1,4 +1,4 @@
-// SPDX-FileCopyrightText: Copyright (c) 2023 NVIDIA CORPORATION & AFFILIATES. All rights reserved.
+// SPDX-FileCopyrightText: Copyright (c) 2023-2024, NVIDIA CORPORATION & AFFILIATES. All rights reserved.
 // SPDX-License-Identifier: Apache-2.0
 //
 // Licensed under the Apache License, Version 2.0 (the "License");
@@ -19,8 +19,10 @@
 #include "../UsdPCH.h"
 // clang-format on
 
-#include <string>
+#include <carb/logging/Log.h>
 
+#include <OmniClient.h>
+#include <string>
 
 namespace omni
 {
@@ -60,7 +62,6 @@ inline std::string normalizeUrl(const char* url)
     return ret;
 }
 
-
 std::string resolve_absolute(std::string parent, std::string relative)
 {
     size_t bufferSize = parent.size() + relative.size();
@@ -69,7 +70,7 @@ std::string resolve_absolute(std::string parent, std::string relative)
     return combined_url;
 }
 
-}
-}
-}
-}
+} // namespace path
+} // namespace utils
+} // namespace isaac
+} // namespace omni
