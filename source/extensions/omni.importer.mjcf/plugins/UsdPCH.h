@@ -1,4 +1,4 @@
-// SPDX-FileCopyrightText: Copyright (c) 2023 NVIDIA CORPORATION & AFFILIATES. All rights reserved.
+// SPDX-FileCopyrightText: Copyright (c) 2023-2024, NVIDIA CORPORATION & AFFILIATES. All rights reserved.
 // SPDX-License-Identifier: Apache-2.0
 //
 // Licensed under the Apache License, Version 2.0 (the "License");
@@ -16,7 +16,8 @@
 #pragma once
 
 // !!! DO NOT INCLUDE THIS FILE IN A HEADER !!!
-// When you include this file in a cpp file, add the file name to premake5.lua's pchFiles list!
+// When you include this file in a cpp file, add the file name to premake5.lua's
+// pchFiles list!
 
 // The usd headers drag in heavy dependencies and are very slow to build.
 // Make it PCH to speed up building time.
@@ -27,7 +28,8 @@
 #    pragma warning(disable : 4267) // conversion from size_t to int
 #    pragma warning(disable : 4305) // argument truncation from double to float
 #    pragma warning(disable : 4800) // int to bool
-#    pragma warning(disable : 4996) // call to std::copy with parameters that may be unsafe
+#    pragma warning(disable : 4996) // call to std::copy with parameters that may be
+                                    // unsafe
 #    define NOMINMAX // Make sure nobody #defines min or max
 #    include <Windows.h> // Include this here so we can curate
 #    undef small // defined in rpcndr.h
@@ -37,7 +39,8 @@
 #    pragma GCC diagnostic ignored "-Wunused-local-typedefs"
 #    pragma GCC diagnostic ignored "-Wunused-function"
 // This suppresses deprecated header warnings, which is impossible with pragmas.
-// Alternative is to specify -Wno-deprecated build option, but that disables other useful warnings too.
+// Alternative is to specify -Wno-deprecated build option, but that disables
+// other useful warnings too.
 #    ifdef __DEPRECATED
 #        define OMNI_USD_SUPPRESS_DEPRECATION_WARNINGS
 #        undef __DEPRECATED
@@ -46,9 +49,11 @@
 
 #define BOOST_PYTHON_STATIC_LIB
 
-// Include cstdio here so that vsnprintf is properly declared. This is necessary because pyerrors.h has
-// #define vsnprintf _vsnprintf which later causes <cstdio> to declare std::_vsnprintf instead of the correct and proper
-// std::vsnprintf. By doing it here before everything else, we avoid this nonsense.
+// Include cstdio here so that vsnprintf is properly declared. This is necessary
+// because pyerrors.h has #define vsnprintf _vsnprintf which later causes
+// <cstdio> to declare std::_vsnprintf instead of the correct and proper
+// std::vsnprintf. By doing it here before everything else, we avoid this
+// nonsense.
 #include <cstdio>
 
 // Python must be included first because it monkeys with macros that cause
@@ -152,7 +157,6 @@
 #include <pxr/usd/usdUtils/stageCache.h>
 #include <pxr/usdImaging/usdImaging/delegate.h>
 
-
 // -- Hydra
 
 #include <pxr/imaging/hd/renderDelegate.h>
@@ -166,7 +170,7 @@
 #include <pxr/usdImaging/usdImaging/tokens.h>
 
 // -- nv extensions
-//#include <audioSchema/sound.h>
+// #include <audioSchema/sound.h>
 
 // -- omni.usd
 #include <omni/usd/UsdContextIncludes.h>

@@ -1,4 +1,4 @@
-# Omniverse MJCF Importer
+# MJCF Importer
 
 The MJCF Importer Extension is used to import MuJoCo representations of scenes.
 MuJoCo Modeling XML File (MJCF), is an XML format for representing a scene in the MuJoCo simulator.

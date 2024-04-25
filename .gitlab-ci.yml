@@ -1,0 +1,167 @@
+include:
+# external
+  - project: 'omniverse/devplat/gitlab/templates/common/kit-extension'
+    file: 'modules/complete-pipeline.yml'
+    ref: v1_latest
+
+
+
+# ==============================================================================================================
+# More variables can be found in common.yml - here we put the ones controlling the jobs workflow
+variables:
+  OSEC_NSPECT_ID: "NSPECT-96O5-S11L"
+  OSEC_CHECKMARX_ENABLED: 'false'
+  OSEC_GITLAB_SAST_ENABLED: 'false'
+  OSEC_PULSE_TRUFFLEHOG_ENABLED: 'false'
+  OSEC_OMNI_PULSE_ENABLED: 'false'
+  OSEC_README_ENABLED: 'false' # WARNING: Also have the init() function get_nspectid_from_repo_toml() in there...
+  ALLOW_PUBLISH_DOCS:
+    value: "true"
+    description: "Set to true to publish docs"
+  ALLOW_PUBLISH_TO_LAUNCHER:
+    value: "false"
+    description: "Set to true to for Kit apps that are published to the Launcher. That adds jobs for that."
+  ALLOW_PUBLISH_EXTENSIONS:
+    value: "true"
+    description: "Set to true to publish extension updates."
+  ALLOW_PUBLISH_CONTAINERS:
+    value: "false"
+    description: "Set to true to publish containers to NGC."
+  ALLOW_SECURITY_SCAN:
+    value: "false"
+    description: "Set to true to trigger a security scan as a child pipeline (non blocking)"
+  ALLOW_SCHEDULE_PIPELINE:
+    value: "true"
+    description: "Set to 'false' to disable schedule pipeline on a all jobs, useful to set it back on only some jobs."
+  ALLOW_TAG_PIPELINE:
+    value: "true"
+    description: "Set to 'false' to disable tag pipeline on a all push jobs."
+  RUN_EXTENSION_BENCHMARKS:
+    value: "false"
+    description: "Set to true to run benchmarks for kit extensions."
+  OMNI_CI_ENABLE_CXX_COVERAGE:
+    value: "false"
+    description: "Set to 'true' to enable C++ code coverage testing."
+  OMNI_CI_ENABLE_SANITIZERS:
+    value: "false"
+    description: "Set to 'true' to enable C++ sanitizer builds."
+  RUN_BUMP_VERSION:
+    value: "false"
+    description: "Set to true to run bump version. Only happens on schedule."
+  RUN_NIGHTLY_TESTS:
+    value: "false"
+    description: "Set to true to run nightly tests. Only happens on schedule."
+  RUN_DOCS_BUILD:
+    value: "true"
+    description: "Set to true to build omni docs. Only happens on schedule."
+
+
+# ==============================================================================================================
+.check-common:
+  stage: check
+  timeout: 20 minutes
+  interruptible: true
+  rules:
+  - if: $RUN_BUMP_VERSION == "true"
+    when: never
+  - !reference [.rules-workflow, rules]
+
+.repo-artifacts:
+  artifacts:
+    when: always
+    expire_in: 2 weeks
+    paths:
+    - _repo/repo.log
+    - _repo/repolog*.txt
+
+
+# ==============================================================================================================
+# By default, all platforms (windows-x86_64, linux-x86_64) are published,
+# but this can be changed in repo.toml config if necessary:
+#    [repo_publish_exts]
+#    platforms = ["linux-x86_64"]
+verify-publish-extensions:
+  extends:
+  - .deploy-common
+  - .omni_nvks_runner_with_docker
+  script:
+  - ./repo.sh build --fetch-only -rd
+  - ./repo.sh publish_exts -a --from-package -c release --verify
+  - ./repo.sh publish_exts -a --from-package -c debug --verify
+  # - ./repo.sh ci publish_extensions
+  needs:
+  # We set all dependencies as optional just in case a platform is not needed,
+  # then the yml file can override both build/test on one platform and deploy will still work.
+  - job: build-windows-x86_64
+    artifacts: true
+    optional: false
+  - job: build-linux-x86_64
+    artifacts: true
+    optional: false
+  rules:
+  - if: $ALLOW_PUBLISH_EXTENSIONS != "true"
+    when: never
+  - if: $RUN_BUMP_VERSION == "true"
+    when: never
+  - !reference [.rules-push, rules]
+  # - !reference [.rules-version-changed, rules]
+
+
+# ==============================================================================================================
+# By default, all platforms (windows-x86_64, linux-x86_64) are published,
+# but this can be changed in repo.toml config if necessary:
+#    [repo_publish_exts]
+#    platforms = ["linux-x86_64"]
+publish-extensions:
+  extends:
+  - .deploy-common
+  - .omni_nvks_runner_with_docker
+  script:
+  - ./repo.sh build --fetch-only -rd
+  - ./repo.sh publish_exts -a --from-package -c release
+  - ./repo.sh publish_exts -a --from-package -c debug
+  # - ./repo.sh ci publish_extensions
+  needs:
+  # We set all dependencies as optional just in case a platform is not needed,
+  # then the yml file can override both build/test on one platform and deploy will still work.
+  - job: build-windows-x86_64
+    artifacts: true
+    optional: false
+  - job: build-linux-x86_64
+    artifacts: true
+    optional: false
+
+  rules:
+  - if: $ALLOW_PUBLISH_EXTENSIONS != "true"
+    when: never
+  - if: $RUN_BUMP_VERSION == "true"
+    when: never
+  - !reference [.rules-version-changed, rules]
+  - !reference [.rules-push-manual, rules]
+
+
+# ==============================================================================================================
+publish-docs:
+  rules:
+  - when: never
+  needs:
+
+
+# ==============================================================================================================
+publish-to-launcher:
+  rules:
+  - when: never
+  needs:
+
+# ==============================================================================================================
+release-new-version:
+  rules:
+  - when: never
+
+
+# ==============================================================================================================
+# update Kit SDK and extensions, merge master, typically done in daily branch
+# set AUTOUPDATE_KIT=true for scheduled pipeline to run
+autoupdate-kit:
+  rules:
+  - when: never

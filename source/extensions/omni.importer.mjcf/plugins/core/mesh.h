@@ -1,35 +1,36 @@
-// Copyright (c) 2022-2023, NVIDIA CORPORATION. All rights reserved.
+// SPDX-FileCopyrightText: Copyright (c) 2022-2024, NVIDIA CORPORATION & AFFILIATES. All rights reserved.
+// SPDX-License-Identifier: Apache-2.0
 //
-// NVIDIA CORPORATION and its licensors retain all intellectual property
-// and proprietary rights in and to this software, related documentation
-// and any modifications thereto. Any use, reproduction, disclosure or
-// distribution of this software and related documentation without an express
-// license agreement from NVIDIA CORPORATION is strictly prohibited.
+// Licensed under the Apache License, Version 2.0 (the "License");
+// you may not use this file except in compliance with the License.
+// You may obtain a copy of the License at
 //
+// http://www.apache.org/licenses/LICENSE-2.0
+//
+// Unless required by applicable law or agreed to in writing, software
+// distributed under the License is distributed on an "AS IS" BASIS,
+// WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+// See the License for the specific language governing permissions and
+// limitations under the License.
 
 #pragma once
 // clang-format off
 #include "../UsdPCH.h"
 // clang-format on
 
-// clang-format off
-#include <omni/usd/UtilsIncludes.h>
-#include <omni/usd/UsdUtils.h>
-// clang-format on
-
-#include "assimp/scene.h"
-
 #include "../math/core/core.h"
 #include "../math/core/maths.h"
+#include "assimp/scene.h"
 
 #include <string>
 #include <vector>
 
 struct TextureData
 {
-    int width; // width of texture - if height == 0, then width will be the same as buffer.size()
-    int height; // height of textur - if height == 0, then the buffer represents a compressed image with file type
-                // corresponding to format
+    int width; // width of texture - if height == 0, then width will be the same
+               // as buffer.size()
+    int height; // height of textur - if height == 0, then the buffer represents a
+                // compressed image with file type corresponding to format
     std::vector<uint8_t> buffer; // r8g8b8a8 if not compressed
     std::string format; // format of the data in buffer if compressed (i.e. png, jpg, bmp)
 };
@@ -85,7 +86,6 @@ enum GymMeshNormalMode
     eComputePerFace, // compute per-face normals
 };
 
-
 struct USDMesh
 {
     std::string name;
@@ -112,10 +112,12 @@ struct Mesh
 
     void DuplicateVertex(uint32_t i);
 
-    void CalculateFaceNormals(); // splits mesh at vertices to calculate faceted normals (changes topology)
+    void CalculateFaceNormals(); // splits mesh at vertices to calculate faceted
+                                 // normals (changes topology)
     void CalculateNormals();
     void Transform(const Matrix44& m);
-    void Normalize(float s = 1.0f); // scale so bounds in any dimension equals s and lower bound = (0,0,0)
+    void Normalize(float s = 1.0f); // scale so bounds in any dimension equals s
+                                    // and lower bound = (0,0,0)
 
     void Flip();
 
@@ -156,7 +158,8 @@ Mesh* CreateTriMesh(float size, float y = 0.0f);
 Mesh* CreateCubeMesh();
 Mesh* CreateQuadMesh(float sizex, float sizez, int gridx, int gridz);
 Mesh* CreateDiscMesh(float radius, uint32_t segments);
-Mesh* CreateTetrahedron(float ground = 0.0f, float height = 1.0f); // fixed but not used
+Mesh* CreateTetrahedron(float ground = 0.0f,
+                        float height = 1.0f); // fixed but not used
 Mesh* CreateSphere(int slices, int segments, float radius = 1.0f);
 Mesh* CreateEllipsoid(int slices, int segments, Vec3 radiis);
 Mesh* CreateCapsule(int slices, int segments, float radius = 1.0f, float halfHeight = 1.0f);

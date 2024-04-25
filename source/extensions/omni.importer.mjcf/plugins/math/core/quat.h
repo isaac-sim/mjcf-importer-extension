@@ -1,11 +1,17 @@
-// Copyright (c) 2020-2023, NVIDIA CORPORATION. All rights reserved.
+// SPDX-FileCopyrightText: Copyright (c) 2020-2024, NVIDIA CORPORATION & AFFILIATES. All rights reserved.
+// SPDX-License-Identifier: Apache-2.0
 //
-// NVIDIA CORPORATION and its licensors retain all intellectual property
-// and proprietary rights in and to this software, related documentation
-// and any modifications thereto. Any use, reproduction, disclosure or
-// distribution of this software and related documentation without an express
-// license agreement from NVIDIA CORPORATION is strictly prohibited.
+// Licensed under the Apache License, Version 2.0 (the "License");
+// you may not use this file except in compliance with the License.
+// You may obtain a copy of the License at
 //
+// http://www.apache.org/licenses/LICENSE-2.0
+//
+// Unless required by applicable law or agreed to in writing, software
+// distributed under the License is distributed on an "AS IS" BASIS,
+// WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+// See the License for the specific language governing permissions and
+// limitations under the License.
 
 #pragma once
 
@@ -222,9 +228,10 @@ CUDA_CALLABLE inline void EulerFromQuatZYX(const Quat& q, float& rotx, float& ro
     }
 }
 
-// converts Euler angles to quaternion performing an intrinsic rotation in yaw then pitch then roll order
-// i.e. first rotate by yaw around z, then rotate by pitch around the rotated y axis, then rotate around
-// roll around the twice (by yaw and pitch) rotated x axis
+// converts Euler angles to quaternion performing an intrinsic rotation in yaw
+// then pitch then roll order i.e. first rotate by yaw around z, then rotate by
+// pitch around the rotated y axis, then rotate around roll around the twice (by
+// yaw and pitch) rotated x axis
 CUDA_CALLABLE inline Quat rpy2quat(const float roll, const float pitch, const float yaw)
 {
     Quat q;
@@ -244,9 +251,10 @@ CUDA_CALLABLE inline Quat rpy2quat(const float roll, const float pitch, const fl
     return q;
 }
 
-// converts Euler angles to quaternion performing an intrinsic rotation in x then y then z order
-// i.e. first rotate by x_rot around x, then rotate by y_rot around the rotated y axis, then rotate by
-// z_rot around the twice (by roll and pitch) rotated z axis
+// converts Euler angles to quaternion performing an intrinsic rotation in x
+// then y then z order i.e. first rotate by x_rot around x, then rotate by y_rot
+// around the rotated y axis, then rotate by z_rot around the twice (by roll and
+// pitch) rotated z axis
 CUDA_CALLABLE inline Quat euler_xyz2quat(const float x_rot, const float y_rot, const float z_rot)
 {
     Quat q;
@@ -267,8 +275,9 @@ CUDA_CALLABLE inline Quat euler_xyz2quat(const float x_rot, const float y_rot, c
 }
 
 // !!! preist@ This function produces euler angles according to this convention:
-// https://www.euclideanspace.com/maths/standards/index.htm Heading = rotation about y axis Attitude = rotation about z
-// axis Bank = rotation about x axis Order: Heading (y) -> Attitude (z) -> Bank (x), and applied intrinsically
+// https://www.euclideanspace.com/maths/standards/index.htm Heading = rotation
+// about y axis Attitude = rotation about z axis Bank = rotation about x axis
+// Order: Heading (y) -> Attitude (z) -> Bank (x), and applied intrinsically
 CUDA_CALLABLE inline void quat2rpy(const Quat& q1, float& bank, float& attitude, float& heading)
 {
     float sqw = q1.w * q1.w;
@@ -300,8 +309,8 @@ CUDA_CALLABLE inline void quat2rpy(const Quat& q1, float& bank, float& attitude,
 }
 
 // preist@:
-// The Euler angles correspond to an extrinsic x-y-z i.e. intrinsic z-y-x rotation
-// and this function does not guard against gimbal lock
+// The Euler angles correspond to an extrinsic x-y-z i.e. intrinsic z-y-x
+// rotation and this function does not guard against gimbal lock
 CUDA_CALLABLE inline void zUpQuat2rpy(const Quat& q1, float& roll, float& pitch, float& yaw)
 {
     // roll (x-axis rotation)
@@ -339,7 +348,6 @@ CUDA_CALLABLE inline void getEulerZYX(const Quat& q, float& yawZ, float& pitchY,
     pitchY = sarg <= (-1.0f) ? (-0.5f) * kPi : (sarg >= (1.0f) ? (0.5f) * kPi : asinf(sarg));
     yawZ = atan2(2 * (q.x * q.y + q.w * q.z), squ + sqx - sqy - sqz);
 }
-
 
 // rotate vector by quaternion (q, w)
 CUDA_CALLABLE inline Vec3 Rotate(const Quat& q, const Vec3& x)
@@ -391,7 +399,8 @@ CUDA_CALLABLE inline Quat Normalize(const Quat& q)
 }
 
 //
-// given two quaternions and a time-step returns the corresponding angular velocity vector
+// given two quaternions and a time-step returns the corresponding angular
+// velocity vector
 //
 CUDA_CALLABLE inline Vec3 DifferentiateQuat(const Quat& q1, const Quat& q0, float invdt)
 {
@@ -415,7 +424,6 @@ CUDA_CALLABLE inline Vec3 DifferentiateQuat(const Quat& q1, const Quat& q0, floa
         return axis * theta * invdt;
     }
 }
-
 
 CUDA_CALLABLE inline Quat IntegrateQuat(const Vec3& omega, const Quat& q0, float dt)
 {

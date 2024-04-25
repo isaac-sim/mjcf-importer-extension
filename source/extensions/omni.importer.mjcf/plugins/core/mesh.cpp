@@ -1,11 +1,17 @@
-// Copyright (c) 2022-2023, NVIDIA CORPORATION. All rights reserved.
+// SPDX-FileCopyrightText: Copyright (c) 2022-2024, NVIDIA CORPORATION & AFFILIATES. All rights reserved.
+// SPDX-License-Identifier: Apache-2.0
 //
-// NVIDIA CORPORATION and its licensors retain all intellectual property
-// and proprietary rights in and to this software, related documentation
-// and any modifications thereto. Any use, reproduction, disclosure or
-// distribution of this software and related documentation without an express
-// license agreement from NVIDIA CORPORATION is strictly prohibited.
+// Licensed under the Apache License, Version 2.0 (the "License");
+// you may not use this file except in compliance with the License.
+// You may obtain a copy of the License at
 //
+// http://www.apache.org/licenses/LICENSE-2.0
+//
+// Unless required by applicable law or agreed to in writing, software
+// distributed under the License is distributed on an "AS IS" BASIS,
+// WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+// See the License for the specific language governing permissions and
+// limitations under the License.
 
 #include "mesh.h"
 
@@ -154,8 +160,7 @@ T PlyRead(ifstream& s, PlyFormat format)
     return data;
 }
 
-} // namespace anonymous
-
+} // namespace
 
 static pxr::GfVec3f AiVector3dToGfVector3f(const aiVector3D& vector)
 {
@@ -171,7 +176,6 @@ pxr::GfVec3f AiColor4DToGfVector3f(const aiColor4D& color)
 {
     return pxr::GfVec3f(color.r, color.g, color.b);
 }
-
 
 void addAssimpNodeToMesh(const aiScene* scene, const aiNode* node, aiMatrix4x4 xform, UVInfo& uvInfo, Mesh* mesh)
 {
@@ -279,7 +283,8 @@ void addAssimpNodeToMesh(const aiScene* scene, const aiNode* node, aiMatrix4x4 x
                     usdmesh.faceVertexIndices.push_back(f.mIndices[k]);
                 }
             }
-            // assert(f.mNumIndices > 0 && f.mNumIndices <= 3); // importer should triangluate mesh
+            // assert(f.mNumIndices > 0 && f.mNumIndices <= 3); // importer should
+            // triangluate mesh
             if (f.mNumIndices == 1)
             {
                 mesh->m_indices.push_back(f.mIndices[0] + indexOffset);
@@ -321,7 +326,6 @@ void addAssimpNodeToMesh(const aiScene* scene, const aiNode* node, aiMatrix4x4 x
         mesh->m_usdMeshPrims.push_back(usdmesh);
     }
 }
-
 
 Mesh* ImportMeshAssimp(const char* path)
 {
@@ -438,7 +442,6 @@ Mesh* ImportMeshAssimp(const char* path)
     return mesh;
 }
 
-
 Mesh* ImportMesh(const char* path)
 {
     std::string ext = GetExtension(path);
@@ -451,7 +454,6 @@ Mesh* ImportMesh(const char* path)
         mesh = ImportMeshFromObj(path);
     else if (ext == "stl")
         mesh = ImportMeshFromStl(path);
-
 
     return mesh;
 }
@@ -597,8 +599,10 @@ Mesh* ImportMeshFromPly(const char* path)
 
     // debug
 #if ENABLE_VERBOSE_OUTPUT
-    printf("Loaded mesh: %s numFaces: %d numVertices: %d format: %d numProperties: %d\n", path, numFaces, numVertices,
-           format, numProperties);
+    printf(
+        "Loaded mesh: %s numFaces: %d numVertices: %d format: %d "
+        "numProperties: %d\n",
+        path, numFaces, numVertices, format, numProperties);
 #endif
 
     Mesh* mesh = new Mesh;
@@ -672,7 +676,8 @@ Mesh* ImportMeshFromPly(const char* path)
         mesh->m_normals[i] = SafeNormalize(mesh->m_normals[i], Vector3(0.0f, 1.0f, 0.0f));
     }
 
-    // cout << "Imported mesh " << path << " in " << (GetSeconds()-startTime)*1000.f << "ms" << endl;
+    // cout << "Imported mesh " << path << " in " <<
+    // (GetSeconds()-startTime)*1000.f << "ms" << endl;
 
     return mesh;
 }
@@ -701,7 +706,6 @@ struct VertexKey
             return vn < rhs.vn;
     }
 };
-
 
 void ImportFromMtlLib(const char* path, std::vector<Material>& materials)
 {
@@ -754,7 +758,6 @@ void ImportFromMtlLib(const char* path, std::vector<Material>& materials)
     }
 }
 
-
 Mesh* ImportMeshFromObj(const char* meshPath)
 {
     ifstream file(meshPath);
@@ -770,7 +773,8 @@ Mesh* ImportMeshFromObj(const char* meshPath)
     vector<Vector3> colors;
     vector<uint32_t>& indices = m->m_indices;
 
-    // typedef unordered_map<VertexKey, uint32_t, MemoryHash<VertexKey> > VertexMap;
+    // typedef unordered_map<VertexKey, uint32_t, MemoryHash<VertexKey> >
+    // VertexMap;
     typedef map<VertexKey, uint32_t> VertexMap;
     VertexMap vertexLookup;
 
@@ -997,7 +1001,8 @@ Mesh* ImportMeshFromObj(const char* meshPath)
     if (m->m_materialAssignments.size())
         m->m_materialAssignments.back().endTri = int(indices.size()) / 3;
 
-    // cout << "Imported mesh " << meshPath << " in " << (GetSeconds()-startTime)*1000.f << "ms" << endl;
+    // cout << "Imported mesh " << meshPath << " in " <<
+    // (GetSeconds()-startTime)*1000.f << "ms" << endl;
 
     return m;
 }
@@ -1039,7 +1044,8 @@ void ExportToObj(const char* path, const Mesh& m)
     {
         // uint32_t j = i+1;
 
-        // no sharing, assumes there is a unique position, texcoord and normal for each vertex
+        // no sharing, assumes there is a unique position, texcoord and normal for
+        // each vertex
         file << "f " << m.m_indices[i * 3] + 1 << " " << m.m_indices[i * 3 + 1] + 1 << " " << m.m_indices[i * 3 + 2] + 1
              << endl;
     }
@@ -1316,7 +1322,6 @@ Mesh* CreateCylinder(int slices, float radius, float halfHeight, bool cap)
 
         mesh->m_texcoords.push_back(Vec2(2.0f * float(i) / slices, 0.0f));
         mesh->m_texcoords.push_back(Vec2(2.0f * float(i) / slices, 1.0f));
-
 
         if (i > 0)
         {

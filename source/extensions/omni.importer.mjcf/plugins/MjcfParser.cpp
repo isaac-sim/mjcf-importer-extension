@@ -1,4 +1,4 @@
-// SPDX-FileCopyrightText: Copyright (c) 2023 NVIDIA CORPORATION & AFFILIATES. All rights reserved.
+// SPDX-FileCopyrightText: Copyright (c) 2023-2024, NVIDIA CORPORATION & AFFILIATES. All rights reserved.
 // SPDX-License-Identifier: Apache-2.0
 //
 // Licensed under the Apache License, Version 2.0 (the "License");
@@ -12,7 +12,6 @@
 // WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
 // See the License for the specific language governing permissions and
 // limitations under the License.
-
 
 #include "MjcfParser.h"
 
@@ -58,12 +57,14 @@ void LoadCompiler(tinyxml2::XMLElement* c, MJCFCompiler& compiler)
 
         if ((s = GetAttr(c, "eulerseq")) != "")
         {
-            for (int i = s.length() - 1; i >= 0; i--)
+            for (int i = (int)s.length() - 1; i >= 0; i--)
             {
                 char axis = s[i];
                 if (axis == 'X' || axis == 'Y' || axis == 'Z')
                 {
-                    CARB_LOG_ERROR("The MJCF importer currently only supports intrinsic euler rotations!");
+                    CARB_LOG_ERROR(
+                        "The MJCF importer currently only supports intrinsic "
+                        "euler rotations!");
                 }
             }
             compiler.eulerseq = s;
@@ -94,7 +95,6 @@ void LoadCompiler(tinyxml2::XMLElement* c, MJCFCompiler& compiler)
     }
 }
 
-
 void LoadInertial(tinyxml2::XMLElement* i, MJCFInertial& inertial)
 {
     if (!i)
@@ -123,7 +123,6 @@ void LoadInertial(tinyxml2::XMLElement* i, MJCFInertial& inertial)
         inertial.principalAxes = principalAxes;
     }
 }
-
 
 void LoadGeom(tinyxml2::XMLElement* g,
               MJCFGeom& geom,
@@ -394,7 +393,9 @@ void LoadTendon(tinyxml2::XMLElement* t,
     getIfExist(t, "springlength", tendon.springlength);
     if (tendon.springlength < 0.0f)
     {
-        CARB_LOG_WARN("*** Automatic tendon springlength calculation is not supported (negative springlengths).");
+        CARB_LOG_WARN(
+            "*** Automatic tendon springlength calculation is not "
+            "supported (negative springlengths).");
     }
     getIfExist(t, "stiffness", tendon.stiffness);
     getIfExist(t, "damping", tendon.damping);
@@ -488,7 +489,6 @@ void LoadTendon(tinyxml2::XMLElement* t,
     }
 }
 
-
 void LoadJoint(tinyxml2::XMLElement* g,
                MJCFJoint& joint,
                std::string className,
@@ -541,7 +541,8 @@ void LoadJoint(tinyxml2::XMLElement* g,
         sscanf(st, "%f %f", &joint.range.x, &joint.range.y);
         if (compiler.autolimits)
         {
-            // set limited to true if a range is specified and autolimits is set to true
+            // set limited to true if a range is specified and autolimits is set to
+            // true
             joint.limited = true;
         }
     }
@@ -561,7 +562,6 @@ void LoadJoint(tinyxml2::XMLElement* g,
         jointIdxCount++;
     }
 }
-
 
 void LoadFreeJoint(tinyxml2::XMLElement* g,
                    MJCFJoint& joint,
@@ -588,7 +588,6 @@ void LoadFreeJoint(tinyxml2::XMLElement* g,
     }
 }
 
-
 void LoadDefault(tinyxml2::XMLElement* e,
                  const std::string className,
                  MJCFClass& cl,
@@ -601,7 +600,8 @@ void LoadDefault(tinyxml2::XMLElement* e,
     LoadTendon(e->FirstChildElement("tendon"), cl.dtendon, className, MJCFTendon::DEFAULT, classes);
     LoadMesh(e->FirstChildElement("mesh"), cl.dmesh, className, compiler, classes);
 
-    // a defaults class should have one general actuator element, so only one of these should be sucessful
+    // a defaults class should have one general actuator element, so only one of
+    // these should be sucessful
     LoadActuator(e->FirstChildElement("motor"), cl.dactuator, className, MJCFActuator::MOTOR, classes);
     LoadActuator(e->FirstChildElement("position"), cl.dactuator, className, MJCFActuator::POSITION, classes);
     LoadActuator(e->FirstChildElement("velocity"), cl.dactuator, className, MJCFActuator::VELOCITY, classes);
@@ -619,7 +619,8 @@ void LoadDefault(tinyxml2::XMLElement* e,
 
         std::string name = d->Attribute("class");
         classes[name] = cl; // Copy from this class
-        LoadDefault(d, name, classes[name], compiler, classes); // Recursively load it
+        LoadDefault(d, name, classes[name], compiler,
+                    classes); // Recursively load it
         d = d->NextSiblingElement("default");
     }
 }
@@ -872,7 +873,6 @@ void LoadAssets(tinyxml2::XMLElement* a,
     }
 }
 
-
 void LoadGlobals(tinyxml2::XMLElement* root,
                  std::string& defaultClassName,
                  std::string baseDirPath,
@@ -904,8 +904,9 @@ void LoadGlobals(tinyxml2::XMLElement* root,
     tinyxml2::XMLElement* d = root->FirstChildElement("default");
     if (!d)
     {
-        // if no default, set the defaultClassName to default if it does not exist yet.
-        // added this condition to avoid overwriting default class parameters parsed in a prior call
+        // if no default, set the defaultClassName to default if it does not exist
+        // yet. added this condition to avoid overwriting default class parameters
+        // parsed in a prior call
         if (classes.find(defaultClassName) == classes.end())
         {
             classes[defaultClassName] = MJCFClass();
@@ -942,7 +943,8 @@ void LoadGlobals(tinyxml2::XMLElement* root,
                    classes, config);
     }
 
-    // finds the origin of the world frame within which the rest of the kinematic tree is defined
+    // finds the origin of the world frame within which the rest of the kinematic
+    // tree is defined
     tinyxml2::XMLElement* wb = root->FirstChildElement("worldbody");
     if (wb)
     {
@@ -1090,6 +1092,6 @@ void LoadGlobals(tinyxml2::XMLElement* root,
     }
 }
 
-}
-}
-}
+} // namespace mjcf
+} // namespace importer
+} // namespace omni

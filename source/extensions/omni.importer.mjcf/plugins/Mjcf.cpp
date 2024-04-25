@@ -1,4 +1,4 @@
-// SPDX-FileCopyrightText: Copyright (c) 2023 NVIDIA CORPORATION & AFFILIATES. All rights reserved.
+// SPDX-FileCopyrightText: Copyright (c) 2023-2024, NVIDIA CORPORATION & AFFILIATES. All rights reserved.
 // SPDX-License-Identifier: Apache-2.0
 //
 // Licensed under the Apache License, Version 2.0 (the "License");
@@ -13,8 +13,13 @@
 // See the License for the specific language governing permissions and
 // limitations under the License.
 
-
 #define CARB_EXPORTS
+
+// clang-format off
+#include "UsdPCH.h"
+// clang-format on
+
+#include "Mjcf.h"
 
 #include "MjcfImporter.h"
 #include "stdio.h"
@@ -23,14 +28,8 @@
 #include <carb/logging/Log.h>
 
 #include <omni/ext/IExt.h>
-#include "Mjcf.h"
-
 #include <omni/kit/IApp.h>
 #include <omni/kit/IStageUpdate.h>
-// clang-format off
-#include <omni/usd/UsdContextIncludes.h>
-#include <omni/usd/UsdContext.h>
-// clang-format on
 
 #define EXTENSION_NAME "omni.importer.mjcf.plugin"
 
@@ -81,7 +80,18 @@ void createAssetFromMJCF(const char* fileName,
     if (!_stage) // If all else fails, import on current stage
     {
         CARB_LOG_INFO("Importing URDF to Current Stage");
-        _stage = omni::usd::UsdContext::getContext()->getStage();
+        // Get the 'active' USD stage from the USD stage cache.
+        const std::vector<pxr::UsdStageRefPtr> allStages = pxr::UsdUtilsStageCache::Get().GetAllStages();
+        if (allStages.size() != 1)
+        {
+            CARB_LOG_ERROR(
+                "Cannot determine the 'active' USD stage (%zu stages "
+                "present in the USD stage cache).",
+                allStages.size());
+            return;
+        }
+
+        _stage = allStages[0];
         save_stage = false;
     }
     std::string result = "";
@@ -95,24 +105,23 @@ void createAssetFromMJCF(const char* fileName,
         // CARB_LOG_WARN("Import Done, saving");
         if (save_stage)
         {
-            // CARB_LOG_WARN("Saving Stage %s", _stage->GetRootLayer()->GetIdentifier().c_str());
+            // CARB_LOG_WARN("Saving Stage %s",
+            // _stage->GetRootLayer()->GetIdentifier().c_str());
             _stage->Save();
         }
     }
 }
 
-}
+} // namespace
 
 CARB_EXPORT void carbOnPluginStartup()
 {
     CARB_LOG_INFO("Startup MJCF Extension");
 }
 
-
 CARB_EXPORT void carbOnPluginShutdown()
 {
 }
-
 
 void fillInterface(omni::importer::mjcf::Mjcf& iface)
 {

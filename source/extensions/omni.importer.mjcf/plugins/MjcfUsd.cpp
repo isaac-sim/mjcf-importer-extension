@@ -1,4 +1,4 @@
-// SPDX-FileCopyrightText: Copyright (c) 2023 NVIDIA CORPORATION & AFFILIATES. All rights reserved.
+// SPDX-FileCopyrightText: Copyright (c) 2023-2024, NVIDIA CORPORATION & AFFILIATES. All rights reserved.
 // SPDX-License-Identifier: Apache-2.0
 //
 // Licensed under the Apache License, Version 2.0 (the "License");
@@ -13,9 +13,11 @@
 // See the License for the specific language governing permissions and
 // limitations under the License.
 
-
 #include "MjcfUsd.h"
+
 #include "utils/Path.h"
+
+#include <carb/logging/Log.h>
 
 namespace omni
 {
@@ -40,7 +42,6 @@ pxr::SdfPath getNextFreePath(pxr::UsdStageWeakPtr stage, const pxr::SdfPath& pri
 
     return uniquePath;
 }
-
 
 std::string makeValidUSDIdentifier(const std::string& name)
 {
@@ -122,7 +123,8 @@ std::string ReplaceBackwardSlash(std::string in)
 
 std::string copyTexture(std::string usdStageIdentifier, std::string texturePath)
 {
-    // switch any windows-style path into linux backwards slash (omniclient handles windows paths)
+    // switch any windows-style path into linux backwards slash (omniclient
+    // handles windows paths)
     usdStageIdentifier = ReplaceBackwardSlash(usdStageIdentifier);
     texturePath = ReplaceBackwardSlash(texturePath);
 
@@ -208,7 +210,9 @@ void createMaterial(pxr::UsdStageWeakPtr usdStage,
                 else
                 {
                     CARB_LOG_WARN(
-                        "Material %s has an image texture, but it won't be imported since the asset is being loaded on memory. Please import it into a destination folder to get all textures.",
+                        "Material %s has an image texture, but it won't be imported "
+                        "since the asset is being loaded on memory. Please import it "
+                        "into a destination folder to get all textures.",
                         material.name.c_str());
                 }
             }
@@ -359,7 +363,6 @@ pxr::UsdGeomMesh createMesh(pxr::UsdStageWeakPtr stage,
         mesh.SetNormalsInterpolation(pxr::UsdGeomTokens->faceVarying);
     }
 
-
     return mesh;
 }
 
@@ -496,7 +499,9 @@ void createAndBindMaterial(pxr::UsdStageWeakPtr stage,
                 else
                 {
                     CARB_LOG_WARN(
-                        "Material %s has an image texture, but it won't be imported since the asset is being loaded on memory. Please import it into a destination folder to get all textures.",
+                        "Material %s has an image texture, but it won't be imported "
+                        "since the asset is being loaded on memory. Please import it "
+                        "into a destination folder to get all textures.",
                         material->name.c_str());
                 }
             }
@@ -518,7 +523,9 @@ void createAndBindMaterial(pxr::UsdStageWeakPtr stage,
                 else
                 {
                     CARB_LOG_WARN(
-                        "Material %s has an image texture, but it won't be imported since the asset is being loaded on memory. Please import it into a destination folder to get all textures.",
+                        "Material %s has an image texture, but it won't be imported "
+                        "since the asset is being loaded on memory. Please import it "
+                        "into a destination folder to get all textures.",
                         material->name.c_str());
                 }
             }
@@ -538,11 +545,10 @@ void createAndBindMaterial(pxr::UsdStageWeakPtr stage,
     }
 }
 
-
 pxr::GfVec3f evalSphereCoord(float u, float v)
 {
-    float theta = u * 2.0 * kPi;
-    float phi = (v - 0.5) * kPi;
+    float theta = u * 2.0f * kPi;
+    float phi = (v - 0.5f) * kPi;
     float cos_phi = cos(phi);
 
     float x = cos_phi * cos(theta);
@@ -552,7 +558,6 @@ pxr::GfVec3f evalSphereCoord(float u, float v)
     return pxr::GfVec3f(x, y, z);
 }
 
-
 int calcSphereIndex(int i, int j, int num_v_verts, int num_u_verts, std::vector<pxr::GfVec3f>& points)
 {
     if (j == 0)
@@ -561,7 +566,7 @@ int calcSphereIndex(int i, int j, int num_v_verts, int num_u_verts, std::vector<
     }
     else if (j == num_v_verts - 1)
     {
-        return points.size() - 1;
+        return (int)points.size() - 1;
     }
     else
     {
@@ -569,7 +574,6 @@ int calcSphereIndex(int i, int j, int num_v_verts, int num_u_verts, std::vector<
         return (j - 1) * num_u_verts + i + 1;
     }
 }
-
 
 pxr::UsdGeomMesh createSphereMesh(pxr::UsdStageWeakPtr stage, const pxr::SdfPath path, float scale)
 {
@@ -584,8 +588,8 @@ pxr::UsdGeomMesh createSphereMesh(pxr::UsdStageWeakPtr stage, const pxr::SdfPath
     u_patches = (u_patches > 3) ? u_patches : 3;
     v_patches = (v_patches > 3) ? v_patches : 2;
 
-    float u_delta = 1.0 / (float)u_patches;
-    float v_delta = 1.0 / (float)v_patches;
+    float u_delta = 1.0f / (float)u_patches;
+    float v_delta = 1.0f / (float)v_patches;
 
     int num_u_verts = u_patches;
     int num_v_verts = v_patches + 1;
@@ -667,7 +671,6 @@ pxr::UsdGeomMesh createSphereMesh(pxr::UsdStageWeakPtr stage, const pxr::SdfPath
     return usdMesh;
 }
 
-
 pxr::UsdPrim createPrimitiveGeom(pxr::UsdStageWeakPtr stage,
                                  const std::string geomPath,
                                  const MJCFGeom* geom,
@@ -678,7 +681,6 @@ pxr::UsdPrim createPrimitiveGeom(pxr::UsdStageWeakPtr stage,
                                  bool collisionGeom)
 {
     pxr::SdfPath path = pxr::SdfPath(geomPath);
-
 
     if (geom->type == MJCFGeom::PLANE)
     {
@@ -1112,7 +1114,6 @@ void applyCollisionGeom(pxr::UsdStageWeakPtr stage, pxr::UsdPrim prim, const MJC
     }
 }
 
-
 pxr::UsdPhysicsJoint createFixedJoint(pxr::UsdStageWeakPtr stage,
                                       const std::string jointPath,
                                       const Transform& poseJointToParentBody,
@@ -1167,7 +1168,6 @@ pxr::UsdPhysicsJoint createD6Joint(pxr::UsdStageWeakPtr stage,
                              pxr::GfVec3f(poseJointToChildBody.p.x, poseJointToChildBody.p.y, poseJointToChildBody.p.z);
     pxr::GfQuatf localRot1 = pxr::GfQuatf(
         poseJointToChildBody.q.w, poseJointToChildBody.q.x, poseJointToChildBody.q.y, poseJointToChildBody.q.z);
-
 
     pxr::SdfPathVector val0{ pxr::SdfPath(parentBodyPath) };
     pxr::SdfPathVector val1{ pxr::SdfPath(bodyPath) };
@@ -1352,6 +1352,6 @@ void createJointDrives(pxr::UsdPhysicsJoint jointPrim,
         driveAPI.CreateMaxForceAttr().Set(maxForce);
     }
 }
-}
-}
-}
+} // namespace mjcf
+} // namespace importer
+} // namespace omni

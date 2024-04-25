@@ -1,4 +1,4 @@
-// SPDX-FileCopyrightText: Copyright (c) 2023 NVIDIA CORPORATION & AFFILIATES. All rights reserved.
+// SPDX-FileCopyrightText: Copyright (c) 2023-2024, NVIDIA CORPORATION & AFFILIATES. All rights reserved.
 // SPDX-License-Identifier: Apache-2.0
 //
 // Licensed under the Apache License, Version 2.0 (the "License");
@@ -25,9 +25,10 @@ namespace mesh
 class MeshImporter
 {
 private:
-    // std::map<std::string, std::pair<Mesh*, carb::gym::GymMeshHandle>> gymGraphicsMeshCache;
-    // std::map<std::pair<float, float>, carb::gym::TriangleMeshHandle> cylinderCache;
-    // std::map<std::string, Mesh*> simulationMeshCache;
+    // std::map<std::string, std::pair<Mesh*, carb::gym::GymMeshHandle>>
+    // gymGraphicsMeshCache; std::map<std::pair<float, float>,
+    // carb::gym::TriangleMeshHandle> cylinderCache; std::map<std::string, Mesh*>
+    // simulationMeshCache;
 
 public:
     MeshImporter()

@@ -12,3 +12,4 @@ Extension Documentation
    source/extensions/omni.importer.mjcf/docs/index
    source/extensions/omni.importer.mjcf/docs/Overview
    source/extensions/omni.importer.mjcf/docs/CHANGELOG
+   CONTRIBUTING
