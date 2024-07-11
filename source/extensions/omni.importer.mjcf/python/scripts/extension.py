@@ -19,6 +19,7 @@ import omni.ui as ui
 from omni.client._omniclient import Result
 from omni.importer.mjcf import _mjcf
 from omni.kit.menu.utils import MenuItemDescription, add_menu_items, remove_menu_items
+from omni.kit.viewport.utility import get_active_viewport
 from omni.kit.window.filepicker import FilePickerDialog
 from pxr import Sdf, Usd, UsdGeom, UsdPhysics
 
@@ -335,6 +336,7 @@ class Extension(omni.ext.IExt):
                 if upAxis == "Y":
                     carb.log_error("The stage Up-Axis must be Z to use the MJCF importer")
                 add_reference_to_stage()
+            return prim_path
 
     def _select_picked_file_callback(self, dialog: FilePickerDialog, filename=None, path=None):
         if not path.startswith("omniverse://"):
@@ -342,7 +344,21 @@ class Extension(omni.ext.IExt):
             self.filename = filename
             if path and filename:
                 self._last_folder = path
-                self._load_robot(path + "/" + filename)
+                prim_path = self._load_robot(path + "/" + filename)
+                task = asyncio.ensure_future(omni.kit.app.get_app().next_update_async())
+                asyncio.ensure_future(task)
+                print("update")
+                viewport_api = get_active_viewport()
+                stage = viewport_api.stage
+                mpu = UsdGeom.GetStageMetersPerUnit(stage)
+                cam_path = viewport_api.camera_path
+                omni.kit.commands.execute(
+                    "FramePrimsCommand",
+                    prim_to_move=cam_path,
+                    prims_to_frame=[prim_path],
+                    aspect_ratio=1,
+                    zoom=0.05 * (self._models["scale"].get_value_as_float()),
+                )
             else:
                 carb.log_error("path and filename not specified")
         else:

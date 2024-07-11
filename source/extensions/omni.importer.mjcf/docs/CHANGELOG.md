@@ -1,5 +1,9 @@
 # Changelog
 
+## [1.1.1] - 2024-07-10
+### Changed
+- Importer frames on imported asset when done through GUI.
+
 ## [1.1.0] - 2023-10-03
 ### Changed
 - Structural and packaging changes
