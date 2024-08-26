@@ -20,3 +20,11 @@ PACKAGE-DEPS.yaml
 /.teamcity
 /tools/ci
 .lastformat
+
+# nvcode
+/.nvcode
+.nvcode.json
+
+# Accidental USD created at the mjcf data folder
+
+source/extensions/isaacsim.asset.importer.mjcf/data/mjcf/**/*.usd
