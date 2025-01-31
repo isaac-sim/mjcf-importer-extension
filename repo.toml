@@ -61,7 +61,7 @@ post_build.commands = [
 # Packaging
 ########################################################################################################################
 [repo_changelog]
-[repo_changelog.packages.urdf_importer]
+[repo_changelog.packages.mjcf_importer]
 enabled = false
 
 [repo_publish]
@@ -87,22 +87,36 @@ sphinx_conf_py_extra = """
     autodoc_mock_imports = ["omni.client", "omni.kit"]
     autodoc_member_order = 'bysource'
 """
+[repo_build.licensing]
+enabled = false
+
+[repo_build.docker]
+enabled = false
 
 
 [repo_publish_exts]
 enabled = true
-use_packman_to_upload_archive = false
 
 kit_path = "${root}/_build/$platform/$config/kit/kit${exe_ext}"
 
 publish_root = "${root}/_build/$platform/$config"
 
-# disable signing as it's not common practice for extension publishing atm
-signing.enabled = false
+# signing is required for extensions to be published for windows
+signing.enabled = true
+
+# verify before publishing
+publish_verification = true
+
+# upload archives using packman (switch to using packman by default to reduce load on nucleus registry)
+use_packman_to_upload_archive = true
+
+archive_pattern = "${root}/_build/packages/omniverse-mjcf-importer@*${platform_target}.${config}.*"
 
 ext_folders = [
-  "${publish_root}/exts"
+  "${publish_root}/exts",
+  "${publish_root}/extsDeprecated"
 ]
 exts.include = [
     "omni.importer.mjcf",
+    "isaacsim.asset.importer.mjcf",
 ]

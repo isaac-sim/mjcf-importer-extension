@@ -3,7 +3,9 @@ include:
   - project: 'omniverse/devplat/gitlab/templates/common/kit-extension'
     file: 'modules/complete-pipeline.yml'
     ref: v1_latest
-
+  - project: 'omniverse/devplat/gitlab/templates/common/compliance'
+    file: 'modules/omniverse-repo-compliance.gitlab-ci.yml'
+    ref: v1_latest
 
 
 # ==============================================================================================================
@@ -165,3 +167,15 @@ release-new-version:
 autoupdate-kit:
   rules:
   - when: never
+
+# overrides for compliance/osec job
+osec:sonarqube:
+  variables:
+    SONAR_SOURCES: "source"
+    SONAR_CFAMILY_COMPILE_COMMANDS: "_build/linux-x86_64/release/compile_commands.json"
+    LINBUILD_EMBEDDED: "1"
+  before_script:
+    - set -eu && ./repo.sh build --generate --config release
+
+.osec:stage_base:
+  stage: .post

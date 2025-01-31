@@ -15,4 +15,7 @@ dofile("_repo/deps/repo_kit_tools/kit-template/premake5.lua")
 
 -- The default kit dev app with extensions from this repo made available.
 -- define_app("omni.app.kit.dev")
-define_app("omni.importer.mjcf.app")
+define_app("isaacsim.asset.importer.mjcf.app")
+
+include ("source/deprecated/omni.importer.mjcf")
+-- include ("source/extensions/isaacsim.asset.importer.mjcf")/
