@@ -4,7 +4,7 @@
 :: you may not use this file except in compliance with the License.
 :: You may obtain a copy of the License at
 ::
-::    https://www.apache.org/licenses/LICENSE-2.0
+::    http://www.apache.org/licenses/LICENSE-2.0
 ::
 :: Unless required by applicable law or agreed to in writing, software
 :: distributed under the License is distributed on an "AS IS" BASIS,
@@ -12,7 +12,7 @@
 :: See the License for the specific language governing permissions and
 :: limitations under the License.
 
-set PM_PACKMAN_VERSION=7.6
+set PM_PACKMAN_VERSION=7.24.2
 
 :: Specify where packman command is rooted
 set PM_INSTALL_PATH=%~dp0..
@@ -48,15 +48,15 @@ echo.
 :: that may be needed in the path
 :ENSURE_DIR
 if not exist "%PM_PACKAGES_ROOT%" (
-    echo Creating packman packages cache at %PM_PACKAGES_ROOT%
-    mkdir "%PM_PACKAGES_ROOT%"
+	echo Creating packman packages cache at %PM_PACKAGES_ROOT%
+	mkdir "%PM_PACKAGES_ROOT%"
 )
 if %errorlevel% neq 0 ( goto ERROR_MKDIR_PACKAGES_ROOT )
 
 :: The Python interpreter may already be externally configured
 if defined PM_PYTHON_EXT (
-    set PM_PYTHON=%PM_PYTHON_EXT%
-    goto PACKMAN
+	set PM_PYTHON=%PM_PYTHON_EXT%
+	goto PACKMAN
 )
 
 set PM_PYTHON_VERSION=3.10.5-1-windows-x86_64
@@ -95,7 +95,7 @@ if exist "%PM_PYTHON%" (
     if exist "%PM_PYTHON_DIR%" ( rd /s /q "%PM_PYTHON_DIR%" > nul )
 )
 
-:: Perform atomic move (allowing ovewrite, /y)
+:: Perform atomic move (allowing overwrite, /y)
 move /y "%TEMP_FOLDER_NAME%" "%PM_PYTHON_DIR%" 1> nul
 :: Verify that python.exe is now where we expect
 if exist "%PM_PYTHON%" goto PACKMAN
@@ -112,7 +112,7 @@ if %errorlevel% neq 0 (
 :PACKMAN
 :: The packman module may already be externally configured
 if defined PM_MODULE_DIR_EXT (
-    set PM_MODULE_DIR=%PM_MODULE_DIR_EXT%
+	set PM_MODULE_DIR=%PM_MODULE_DIR_EXT%
 ) else (
     set PM_MODULE_DIR=%PM_PACKAGES_ROOT%\packman-common\%PM_PACKMAN_VERSION%
 )

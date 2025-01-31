@@ -1,0 +1,30 @@
+[package]
+title = "MJCF Importer Application"
+description = "Kit dev app with isaacsim.asset.importer.mjcf extension enabled."
+version = "1.0.0"
+keywords = ["app"]
+
+[dependencies]
+"omni.app.dev" = {}
+"omni.usd.schema.physx" = {}
+"isaacsim.asset.importer.mjcf" = {}
+"omni.importer.mjcf" = {}
+
+[settings]
+app.window.title = "MJCF Importer Application"
+app.settings.persistent = true
+exts."omni.kit.test".includeTests.0 = "*isaacsim.asset.importer.mjcf*"
+
+[settings.app.exts]
+folders.'++' = [
+    "${app}/../exts",
+    "${app}/../extcache",
+    "${app}/../extsDeprecated",
+    ] # Make extensions from this repo available.
+
+[settings.persistent]
+app.primCreation.typedDefaults.camera.clippingRange = [0.01, 10000000.0]
+
+[settings.persistent.app.stage]
+upAxis = "Z"
+materialStrength = "weakerThanDescendants"

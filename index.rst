@@ -1,6 +1,6 @@
+==========================
 Omniverse MJCF Importer
-=======================
-
+==========================
 .. mdinclude:: README.md
 
 Extension Documentation
@@ -9,7 +9,20 @@ Extension Documentation
    :maxdepth: 1
    :glob:
 
-   source/extensions/omni.importer.mjcf/docs/index
-   source/extensions/omni.importer.mjcf/docs/Overview
-   source/extensions/omni.importer.mjcf/docs/CHANGELOG
-   CONTRIBUTING
+   source/extensions/isaacsim.asset.importer.mjcf/docs/index
+   source/extensions/isaacsim.asset.importer.mjcf/docs/Overview
+   source/extensions/isaacsim.asset.importer.mjcf/docs/CHANGELOG
+
+
+CONTRIBUTING
+~~~~~~~~~~~~~
+.. mdinclude:: CONTRIBUTING.md
+
+Deprecated Extension
+~~~~~~~~~~~~~~~~~~~~~
+.. toctree::
+   :maxdepth: 1
+   :glob:
+
+   source/deprecated/omni.importer.mjcf/docs/CHANGELOG
+   source/deprecated/omni.importer.mjcf/docs/README
