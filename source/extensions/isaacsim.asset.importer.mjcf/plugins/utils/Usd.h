@@ -18,6 +18,9 @@
 // clang-format off
 #include <pxr/pxr.h>
 #include <pxr/usd/usd/stage.h>
+#include <pxr/usd/usdGeom/xform.h>
+#include <pxr/usd/usdGeom/xformable.h>
+#include <pxr/base/gf/matrix4d.h>
 // clang-format on
 
 /**
@@ -39,6 +42,32 @@ namespace mjcf
 namespace usd
 {
 
+
+inline pxr::GfMatrix4d GetGlobalTransform(const pxr::UsdPrim& prim)
+{
+    pxr::GfMatrix4d globalTransform(1.0);
+
+    pxr::UsdPrim currentPrim = prim;
+    while (currentPrim && currentPrim.IsValid())
+    {
+        if (pxr::UsdGeomXformable xformable = pxr::UsdGeomXformable(currentPrim))
+        {
+            bool resetsXformStack = false;
+            pxr::GfMatrix4d localTransform;
+            xformable.GetLocalTransformation(&localTransform, &resetsXformStack);
+
+            globalTransform = localTransform * globalTransform;
+
+            if (resetsXformStack)
+            {
+                break;
+            }
+        }
+        currentPrim = currentPrim.GetParent();
+    }
+
+    return globalTransform;
+}
 // Make a path name that is not already used.
 inline std::string GetNewSdfPathString(pxr::UsdStageWeakPtr stage, std::string path, int nameClashNum = 0)
 {

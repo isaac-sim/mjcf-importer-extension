@@ -415,7 +415,7 @@ void applyRigidBody(std::unordered_map<std::string, pxr::UsdStageRefPtr> stages,
 
     pxr::UsdPhysicsMassAPI massAPI = pxr::UsdPhysicsMassAPI::Apply(bodyPrim.GetPrim());
     // TODO: need to support override computation
-    if (body->inertial && config.importInertiaTensor)
+    if (body->inertial) // && config.importInertiaTensor)
     {
         massAPI.CreateMassAttr().Set(body->inertial->mass);
 

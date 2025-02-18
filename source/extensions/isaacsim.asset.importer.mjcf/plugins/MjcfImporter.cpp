@@ -16,7 +16,13 @@
 
 #include "MjcfImporter.h"
 
+#include "math/core/maths.h"
+#include "utils/Path.h"
+
 #include <pxr/usd/usdGeom/plane.h>
+#include <pxr/usd/usdPhysics/fixedJoint.h>
+#include <pxr/usd/usdPhysics/sphericalJoint.h>
+
 
 namespace isaacsim
 {
@@ -27,13 +33,108 @@ namespace importer
 namespace mjcf
 {
 
+struct JointDefinition
+{
+    std::string type;
+    std::string body1;
+    std::string body2;
+    std::string axis;
+    Vec3 position;
+    Quat quaternion;
+};
+
+std::vector<JointDefinition> analyzeConstraints(const std::vector<MJCFEqualityConnect*>& constraints)
+{
+    // Group constraints by body pairs
+    std::map<std::pair<std::string, std::string>, std::vector<MJCFEqualityConnect*>> constraintGroups;
+
+    for (auto constraint : constraints)
+    {
+        std::pair<std::string, std::string> bodyPair;
+        if (constraint->body1 < constraint->body2)
+        {
+            bodyPair = { constraint->body1, constraint->body2 };
+        }
+        else
+        {
+            bodyPair = { constraint->body2, constraint->body1 };
+        }
+        constraintGroups[bodyPair].push_back(constraint);
+    }
+
+    std::vector<JointDefinition> jointDefinitions;
+
+    for (const auto& [bodyPair, constraints] : constraintGroups)
+    {
+        JointDefinition jointDef;
+        jointDef.body1 = constraints[0]->body1;
+        jointDef.body2 = constraints[0]->body2;
+
+        switch (constraints.size())
+        {
+        case 1:
+        {
+            // Spherical joint
+            jointDef.type = "spherical";
+            jointDef.position = constraints[0]->anchor;
+            break;
+        }
+        case 2:
+        {
+            // Revolute joint
+            jointDef.type = "revolute";
+            Vec3 axis = constraints[0]->anchor - constraints[1]->anchor;
+            axis = Normalize(axis);
+            for (int i = 0; i < 3; ++i)
+            {
+                axis[i] = fabs(axis[i]); // Direction doesn't matter
+            }
+
+            int principalAxisIdx = getClosestAxis(axis);
+            const char* principalAxes[] = { "X", "Y", "Z" };
+
+            jointDef.axis = principalAxes[principalAxisIdx];
+            jointDef.position = (constraints[0]->anchor + constraints[1]->anchor) * 0.5f;
+
+            Vec3 principalAxis;
+            principalAxis[principalAxisIdx] = 1.0f;
+
+            if (Length(axis - principalAxis) > 1e-6f)
+            {
+                jointDef.quaternion = quaternionFromVectors(axis, principalAxis);
+            }
+            else
+            {
+                jointDef.quaternion = Quat(1, 0, 0, 0);
+            }
+            break;
+        }
+        case 3:
+        {
+            // Fixed joint
+            jointDef.type = "fixed";
+            jointDef.position = Vec3(0, 0, 0);
+            for (const auto& constraint : constraints)
+            {
+                jointDef.position = jointDef.position + constraint->anchor;
+            }
+            jointDef.position = jointDef.position * (1.0f / 3.0f);
+            break;
+        }
+        }
+        jointDefinitions.push_back(jointDef);
+    }
+
+    return jointDefinitions;
+}
+
 MJCFImporter::MJCFImporter(const std::string fullPath, ImportConfig& config)
 {
     defaultClassName = "main";
 
     std::string filePath = fullPath;
     char relPathBuffer[2048];
-    MakeRelativePath(filePath.c_str(), "", relPathBuffer);
+    isaacsim::asset::utils::path::MakeRelativePath(filePath.c_str(), "", relPathBuffer);
     baseDirPath = std::string(relPathBuffer);
 
     tinyxml2::XMLDocument doc;
@@ -53,14 +154,15 @@ MJCFImporter::MJCFImporter(const std::string fullPath, ImportConfig& config)
         while (includeRoot)
         {
             LoadGlobals(includeRoot, defaultClassName, baseDirPath, worldBody, bodies, actuators, tendons, contacts,
-                        simulationMeshCache, meshes, materials, textures, compiler, classes, jointToActuatorIdx, config);
+                        equalityConnects, simulationMeshCache, meshes, materials, textures, compiler, classes,
+                        jointToActuatorIdx, config);
 
             includeElement = includeElement->NextSiblingElement("include");
             includeRoot = LoadInclude(includeDoc, includeElement, baseDirPath);
         }
     }
 
-    LoadGlobals(root, defaultClassName, baseDirPath, worldBody, bodies, actuators, tendons, contacts,
+    LoadGlobals(root, defaultClassName, baseDirPath, worldBody, bodies, actuators, tendons, contacts, equalityConnects,
                 simulationMeshCache, meshes, materials, textures, compiler, classes, jointToActuatorIdx, config);
 
     for (int i = 0; i < int(bodies.size()); ++i)
@@ -190,6 +292,74 @@ bool MJCFImporter::AddPhysicsEntities(std::unordered_map<std::string, pxr::UsdSt
         AddTendons(stages["stage"], rootPrimPath);
 
         addWorldGeomsAndSites(stages, rootPrimPath, config, instanceableUSDPath);
+    }
+    std::vector<JointDefinition> jointDefinitions = analyzeConstraints(equalityConnects);
+    for (const auto& jointDef : jointDefinitions)
+    {
+        pxr::UsdEditContext context(stages["stage"], stages["physics_stage"]->GetRootLayer());
+        std::string jointPath = rootPrimPath + "/loop_joints/" + SanitizeUsdName(jointDef.body1 + "_" + jointDef.body2);
+        // Get the body prim paths
+        auto body1Path = bodyNameToPrim[jointDef.body1].GetPath();
+        auto body2Path = bodyNameToPrim[jointDef.body2].GetPath();
+        // Get the body prims and their world poses
+        pxr::UsdPrim body1Prim = stages["stage"]->GetPrimAtPath(pxr::SdfPath(body1Path));
+        pxr::UsdPrim body2Prim = stages["stage"]->GetPrimAtPath(pxr::SdfPath(body2Path));
+        if (!body1Prim || !body2Prim)
+        {
+            // CARB_LOG_ERROR("Body not found: %s", body1Path.c_str());
+            // CARB_LOG_ERROR("Body not found: %s", body2Path.c_str());
+            continue;
+        }
+        pxr::GfMatrix4f body1Transform =
+            pxr::GfMatrix4f(isaacsim::asset::importer::mjcf::usd::GetGlobalTransform(body1Prim));
+        pxr::GfMatrix4f body2Transform =
+            pxr::GfMatrix4f(isaacsim::asset::importer::mjcf::usd::GetGlobalTransform(body2Prim));
+
+        // Joint position in world space
+        pxr::GfMatrix4f jointWorldTransform =
+            pxr::GfMatrix4f(pxr::GfRotation(pxr::GfQuatf(jointDef.quaternion.x, jointDef.quaternion.y,
+                                                         jointDef.quaternion.z, jointDef.quaternion.w)),
+                            pxr::GfVec3f(jointDef.position.x, jointDef.position.y, jointDef.position.z)) *
+            body1Transform;
+
+        // Calculate relative transforms from each body to the joint
+        pxr::GfMatrix4f poseJointToParentBody = jointWorldTransform * body1Transform.GetInverse();
+
+        pxr::GfMatrix4f poseJointToChildBody = jointWorldTransform * body2Transform.GetInverse();
+
+        if (jointDef.type == "revolute")
+        {
+            pxr::UsdPhysicsRevoluteJoint jointPrim =
+                pxr::UsdPhysicsRevoluteJoint::Define(stages["stage"], pxr::SdfPath(jointPath));
+
+            // Set the rotation axis
+            jointPrim.CreateAxisAttr().Set(pxr::TfToken(jointDef.axis));
+        }
+        else if (jointDef.type == "spherical")
+        {
+            pxr::UsdPhysicsSphericalJoint jointPrim =
+                pxr::UsdPhysicsSphericalJoint::Define(stages["stage"], pxr::SdfPath(jointPath));
+        }
+        else if (jointDef.type == "fixed")
+        {
+            pxr::UsdPhysicsFixedJoint jointPrim =
+                pxr::UsdPhysicsFixedJoint::Define(stages["stage"], pxr::SdfPath(jointPath));
+        }
+        pxr::UsdPhysicsJoint jointPrim = pxr::UsdPhysicsJoint(stages["stage"]->GetPrimAtPath(pxr::SdfPath(jointPath)));
+
+        pxr::SdfPathVector val0{ pxr::SdfPath(body1Path) };
+        pxr::SdfPathVector val1{ pxr::SdfPath(body2Path) };
+
+        jointPrim.CreateBody0Rel().SetTargets(val0);
+        jointPrim.CreateLocalPos0Attr().Set(pxr::GfVec3f(jointDef.position.x, jointDef.position.y, jointDef.position.z));
+        jointPrim.CreateLocalRot0Attr().Set(
+            pxr::GfQuatf(jointDef.quaternion.x, jointDef.quaternion.y, jointDef.quaternion.z, jointDef.quaternion.w));
+
+        jointPrim.CreateBody1Rel().SetTargets(val1);
+        jointPrim.CreateLocalPos1Attr().Set(poseJointToChildBody.ExtractTranslation());
+        jointPrim.CreateLocalRot1Attr().Set(poseJointToChildBody.ExtractRotationQuat());
+
+        jointPrim.CreateExcludeFromArticulationAttr().Set(true);
     }
     return true;
 }
@@ -481,10 +651,26 @@ void createTendonAxisRootAPI(const pxr::UsdPhysicsJoint& rootJointPrim,
     pxr::PhysxSchemaPhysxTendonAxisRootAPI rootAPI =
         pxr::PhysxSchemaPhysxTendonAxisRootAPI::Apply(rootJointPrim.GetPrim(), name);
 
+    float Stiffness = t->stiffness;
+    if (Stiffness == 0)
+    {
+        CARB_LOG_WARN(
+            "Tendon %s has no stiffness, setting to 1.0 - Please check your model once imported to validate the behavior",
+            name.GetText());
+        Stiffness = 1.0;
+    }
     if (t->limited)
     {
         rootAPI.CreateLowerLimitAttr().Set(t->range[0]);
         rootAPI.CreateUpperLimitAttr().Set(t->range[1]);
+        // If the tendon is limited, we need to set the limit stiffness instead of the Stiffness.
+        rootAPI.CreateLimitStiffnessAttr().Set(Stiffness);
+        rootAPI.CreateStiffnessAttr().Set(0.0f);
+    }
+    else
+    {
+        rootAPI.CreateLimitStiffnessAttr().Set(0.0f);
+        rootAPI.CreateStiffnessAttr().Set(Stiffness);
     }
 
     if (t->springlength >= 0)
@@ -492,8 +678,22 @@ void createTendonAxisRootAPI(const pxr::UsdPhysicsJoint& rootJointPrim,
         rootAPI.CreateRestLengthAttr().Set(t->springlength);
     }
 
-    rootAPI.CreateStiffnessAttr().Set(t->stiffness);
     rootAPI.CreateDampingAttr().Set(t->damping);
+    pxr::VtArray<float> forcecoeffs;
+    for (int i = 0; i < (int)coef.size(); i++)
+    {
+        auto forcecoeff = coef[i];
+        if (abs(forcecoeff) < 1e-6)
+        {
+            forcecoeff = 1.0f * sign(forcecoeff);
+        }
+        else
+        {
+            forcecoeff = 1.0f / forcecoeff;
+        }
+        forcecoeffs.push_back(forcecoeff);
+    }
+    pxr::PhysxSchemaPhysxTendonAxisAPI(rootAPI, rootAPI.GetName()).CreateForceCoefficientAttr().Set(forcecoeffs);
 
     pxr::PhysxSchemaPhysxTendonAttachmentAPI(rootAPI, rootAPI.GetName()).CreateGearingAttr().Set(coef);
 }
@@ -501,12 +701,18 @@ void createTendonAxisRootAPI(const pxr::UsdPhysicsJoint& rootJointPrim,
 void MJCFImporter::AddTendons(pxr::UsdStageWeakPtr stage, std::string rootPath)
 {
     // adding tendons
+    size_t tendonIndex = 0;
     for (const MJCFTendon* t : tendons)
     {
         if (t->type == MJCFTendon::FIXED)
         {
             // setting the joint with the lowest kinematic hierarchy number as the
             // TendonAxisRoot
+            std::string tendonName = t->name;
+            if (tendonName.empty())
+            {
+                tendonName = SanitizeUsdName("tendon_" + std::to_string(tendonIndex++));
+            }
             if (t->fixedJoints.size() != 0)
             {
                 MJCFTendon::FixedJoint* rootJoint = t->fixedJoints[0];
@@ -524,18 +730,15 @@ void MJCFImporter::AddTendons(pxr::UsdStageWeakPtr stage, std::string rootPath)
 
                 if (revoluteJointsMap.find(rootJoint->joint) != revoluteJointsMap.end())
                 {
-                    createTendonAxisRootAPI(
-                        revoluteJointsMap[rootJoint->joint], pxr::TfToken(SanitizeUsdName(t->name)), coef, t);
+                    createTendonAxisRootAPI(revoluteJointsMap[rootJoint->joint], pxr::TfToken(tendonName), coef, t);
                 }
                 else if (prismaticJointsMap.find(rootJoint->joint) != prismaticJointsMap.end())
                 {
-                    createTendonAxisRootAPI(
-                        prismaticJointsMap[rootJoint->joint], pxr::TfToken(SanitizeUsdName(t->name)), coef, t);
+                    createTendonAxisRootAPI(prismaticJointsMap[rootJoint->joint], pxr::TfToken(tendonName), coef, t);
                 }
                 else if (d6JointsMap.find(rootJoint->joint) != d6JointsMap.end())
                 {
-                    createTendonAxisRootAPI(
-                        d6JointsMap[rootJoint->joint], pxr::TfToken(SanitizeUsdName(t->name)), coef, t);
+                    createTendonAxisRootAPI(d6JointsMap[rootJoint->joint], pxr::TfToken(tendonName), coef, t);
                 }
 
                 else
@@ -555,22 +758,67 @@ void MJCFImporter::AddTendons(pxr::UsdStageWeakPtr stage, std::string rootPath)
                         {
                             pxr::UsdPhysicsRevoluteJoint childJointPrim = revoluteJointsMap[childJoint->joint];
                             pxr::PhysxSchemaPhysxTendonAxisAPI axisAPI = pxr::PhysxSchemaPhysxTendonAxisAPI::Apply(
-                                childJointPrim.GetPrim(), pxr::TfToken(SanitizeUsdName(t->name)));
+                                childJointPrim.GetPrim(), pxr::TfToken(tendonName));
                             axisAPI.CreateGearingAttr().Set(coef);
+                            pxr::VtArray<float> forcecoeffs;
+                            for (int i = 0; i < (int)coef.size(); i++)
+                            {
+                                auto forcecoeff = coef[i];
+                                if (abs(forcecoeff) < 1e-6)
+                                {
+                                    forcecoeff = 1.0f * sign(forcecoeff);
+                                }
+                                else
+                                {
+                                    forcecoeff = 1.0f / forcecoeff;
+                                }
+                                forcecoeffs.push_back(forcecoeff);
+                            }
+                            axisAPI.CreateForceCoefficientAttr().Set(forcecoeffs);
                         }
                         else if (prismaticJointsMap.find(childJoint->joint) != prismaticJointsMap.end())
                         {
                             pxr::UsdPhysicsPrismaticJoint childJointPrim = prismaticJointsMap[childJoint->joint];
                             pxr::PhysxSchemaPhysxTendonAxisAPI axisAPI = pxr::PhysxSchemaPhysxTendonAxisAPI::Apply(
-                                childJointPrim.GetPrim(), pxr::TfToken(SanitizeUsdName(t->name)));
+                                childJointPrim.GetPrim(), pxr::TfToken(tendonName));
                             axisAPI.CreateGearingAttr().Set(coef);
+                            pxr::VtArray<float> forcecoeffs;
+                            for (int i = 0; i < (int)coef.size(); i++)
+                            {
+                                auto forcecoeff = coef[i];
+                                if (abs(forcecoeff) < 1e-6)
+                                {
+                                    forcecoeff = 1.0f * sign(forcecoeff);
+                                }
+                                else
+                                {
+                                    forcecoeff = 1.0f / forcecoeff;
+                                }
+                                forcecoeffs.push_back(forcecoeff);
+                            }
+                            axisAPI.CreateForceCoefficientAttr().Set(forcecoeffs);
                         }
                         else if (d6JointsMap.find(childJoint->joint) != d6JointsMap.end())
                         {
                             pxr::UsdPhysicsJoint childJointPrim = d6JointsMap[childJoint->joint];
                             pxr::PhysxSchemaPhysxTendonAxisAPI axisAPI = pxr::PhysxSchemaPhysxTendonAxisAPI::Apply(
-                                childJointPrim.GetPrim(), pxr::TfToken(SanitizeUsdName(t->name)));
+                                childJointPrim.GetPrim(), pxr::TfToken(tendonName));
                             axisAPI.CreateGearingAttr().Set(coef);
+                            pxr::VtArray<float> forcecoeffs;
+                            for (int i = 0; i < (int)coef.size(); i++)
+                            {
+                                auto forcecoeff = coef[i];
+                                if (abs(forcecoeff) < 1e-6)
+                                {
+                                    forcecoeff = 1.0f * sign(forcecoeff);
+                                }
+                                else
+                                {
+                                    forcecoeff = 1.0f / forcecoeff;
+                                }
+                                forcecoeffs.push_back(forcecoeff);
+                            }
+                            axisAPI.CreateForceCoefficientAttr().Set(forcecoeffs);
                         }
                         else
                         {
@@ -798,6 +1046,7 @@ void MJCFImporter::CreatePhysicsBodyAndJoint(std::unordered_map<std::string, pxr
         // add Rigid Body
         if (bodyPrim)
         {
+            bodyNameToPrim[body->name] = bodyPrim.GetPrim();
             applyRigidBody(stages, bodyPrim, body, config);
         }
         else
@@ -807,15 +1056,14 @@ void MJCFImporter::CreatePhysicsBodyAndJoint(std::unordered_map<std::string, pxr
         }
         if (isRoot)
         {
-            pxr::UsdGeomXform rootPrim = pxr::UsdGeomXform::Define(stages["stage"], pxr::SdfPath(rootPrimPath));
+            pxr::UsdGeomXform rootPrim = pxr::UsdGeomXform::Define(stages["stage"], pxr::SdfPath(bodyPath));
             {
                 pxr::UsdEditContext context(stages["stage"], stages["physics_stage"]->GetRootLayer());
                 applyArticulationAPI(stages, rootPrim, config);
                 if (config.fixBase || numJoints == 0)
                 {
                     // enable multiple root joints
-                    createFixedRoot(stages, rootPath + "/joints/rootJoint_" + SanitizeUsdName(body->name),
-                                    rootPrimPath + "/" + SanitizeUsdName(body->name));
+                    createFixedRoot(stages, rootPath + "/joints/rootJoint_" + SanitizeUsdName(body->name), bodyPath);
                 }
             }
         }
@@ -984,7 +1232,7 @@ void MJCFImporter::addJoints(std::unordered_map<std::string, pxr::UsdStageRefPtr
 
                 revoluteJointsMap[joint->name] = jointPrim;
 
-                createJointDrives(jointPrim, joint, actuator, "X", config);
+                createJointDrives(jointPrim, joint, actuator, "angular", config);
             }
             else if (joint->type == MJCFJoint::SLIDE)
             {
@@ -1011,7 +1259,7 @@ void MJCFImporter::addJoints(std::unordered_map<std::string, pxr::UsdStageRefPtr
 
                 prismaticJointsMap[joint->name] = jointPrim;
 
-                createJointDrives(jointPrim, joint, actuator, "X", config);
+                createJointDrives(jointPrim, joint, actuator, "linear", config);
             }
             else if (joint->type == MJCFJoint::BALL)
             {

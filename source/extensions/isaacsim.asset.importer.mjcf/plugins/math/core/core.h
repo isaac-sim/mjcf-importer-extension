@@ -163,31 +163,3 @@ size_t sizeof_array(const T (&)[N])
 
 // given the path of one file it strips the filename and appends the relative
 // path onto it
-inline void MakeRelativePath(const char* filePath, const char* fileRelativePath, char* fullPath)
-{
-    // get base path of file
-    const char* lastSlash = nullptr;
-
-    if (!lastSlash)
-        lastSlash = strrchr(filePath, '\\');
-    if (!lastSlash)
-        lastSlash = strrchr(filePath, '/');
-
-    int baseLength = 0;
-
-    if (lastSlash)
-    {
-        baseLength = int(lastSlash - filePath) + 1;
-
-        // copy base path (including slash to relative path)
-        memcpy(fullPath, filePath, baseLength);
-    }
-
-    // if (fileRelativePath[0] == '.')
-    //++fileRelativePath;
-    if (fileRelativePath[0] == '\\' || fileRelativePath[0] == '/')
-        ++fileRelativePath;
-
-    // append mesh filename
-    strcpy(fullPath + baseLength, fileRelativePath);
-}

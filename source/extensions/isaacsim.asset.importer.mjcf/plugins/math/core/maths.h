@@ -2218,3 +2218,53 @@ inline bool TestSphereAgainstFrustum(const Plane* planes, Vec3 center, float rad
 
     return true;
 }
+
+inline float sign(float x)
+{
+    return x < 0 ? -1.0f : 1.0f;
+}
+
+inline int getClosestAxis(const Vec3& vec)
+{
+    Vec3 normalized = Normalize(vec);
+    Vec3 axes[3] = { Vec3(1, 0, 0), Vec3(0, 1, 0), Vec3(0, 0, 1) };
+
+    int maxIdx = 0;
+    float maxDot = std::abs(Dot(normalized, axes[0]));
+
+    for (int i = 1; i < 3; ++i)
+    {
+        float dot = std::abs(Dot(normalized, axes[i]));
+        if (dot > maxDot)
+        {
+            maxDot = dot;
+            maxIdx = i;
+        }
+    }
+
+    return maxIdx;
+}
+
+inline Quat quaternionFromVectors(const Vec3& vec1, const Vec3& vec2)
+{
+    Vec3 v1 = Normalize(vec1);
+    Vec3 v2 = Normalize(vec2);
+
+    float dot = Dot(v1, v2);
+
+    if (dot > 0.999999f)
+    {
+        return Quat(1, 0, 0, 0);
+    }
+
+    if (dot < -0.999999f)
+    {
+        return Quat(0, 1, 0, 0);
+    }
+
+    Vec3 cross = Cross(v1, v2);
+    float s = std::sqrt((1.0f + dot) * 2.0f);
+    float invs = 1.0f / s;
+
+    return Quat(s * 0.5f, cross.x * invs, cross.y * invs, cross.z * invs);
+}

@@ -62,6 +62,7 @@ public:
     std::vector<MJCFActuator*> actuators;
     std::vector<MJCFTendon*> tendons;
     std::vector<MJCFContact*> contacts;
+    std::vector<MJCFEqualityConnect*> equalityConnects;
     MJCFBody worldBody;
 
     std::map<std::string, pxr::UsdPhysicsRevoluteJoint> revoluteJointsMap;
@@ -72,10 +73,10 @@ public:
     std::map<std::string, pxr::UsdPrim> sitePrimMap;
     std::map<std::string, pxr::UsdPrim> siteToBodyPrim;
     std::map<std::string, pxr::UsdPrim> geomToBodyPrim;
+    std::map<std::string, pxr::UsdPrim> bodyNameToPrim;
 
     std::queue<MJCFBody*> bodyQueue;
     std::map<std::string, int> jointToKinematicHierarchy;
-
     std::map<std::string, int> jointToActuatorIdx;
 
     std::map<std::string, MeshInfo> simulationMeshCache;

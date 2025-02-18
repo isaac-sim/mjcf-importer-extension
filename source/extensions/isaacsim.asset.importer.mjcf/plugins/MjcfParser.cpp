@@ -111,6 +111,13 @@ void LoadInertial(tinyxml2::XMLElement* i, MJCFInertial& inertial)
     getIfExist(i, "mass", inertial.mass);
     getIfExist(i, "pos", inertial.pos);
     getIfExist(i, "diaginertia", inertial.diaginertia);
+    getIfExist(i, "quat", inertial.principalAxes);
+    // Check if quat is present to determine if full inertia is present
+    const char* qt = i->Attribute("quat");
+    if (qt)
+    {
+        inertial.hasFullInertia = true;
+    }
 
     float fullInertia[6];
     const char* st = i->Attribute("fullinertia");
@@ -746,6 +753,18 @@ void LoadBody(tinyxml2::XMLElement* g,
     }
 }
 
+void LoadEqualityConnect(tinyxml2::XMLElement* c, MJCFEqualityConnect* equalityConnect)
+{
+
+    equalityConnect->body1 = std::string(c->Attribute("body1"));
+    equalityConnect->body2 = std::string(c->Attribute("body2"));
+
+    // Parse anchor attribute
+    std::string anchorStr = std::string(c->Attribute("anchor"));
+    sscanf(anchorStr.c_str(), "%f %f %f", &equalityConnect->anchor.x, &equalityConnect->anchor.y,
+           &equalityConnect->anchor.z);
+}
+
 tinyxml2::XMLElement* LoadFile(tinyxml2::XMLDocument& doc, const std::string filePath)
 {
     if (doc.LoadFile(filePath.c_str()) != tinyxml2::XML_SUCCESS)
@@ -898,6 +917,7 @@ void LoadGlobals(tinyxml2::XMLElement* root,
                  std::vector<MJCFActuator*>& actuators,
                  std::vector<MJCFTendon*>& tendons,
                  std::vector<MJCFContact*>& contacts,
+                 std::vector<MJCFEqualityConnect*>& equalityConnects,
                  std::map<std::string, MeshInfo>& simulationMeshCache,
                  std::map<std::string, MJCFMesh>& meshes,
                  std::map<std::string, MJCFMaterial>& materials,
@@ -1088,7 +1108,19 @@ void LoadGlobals(tinyxml2::XMLElement* root,
         tc = tc->NextSiblingElement("tendon");
     }
 
-
+    tinyxml2::XMLElement* eq = root->FirstChildElement("equality");
+    while (eq)
+    {
+        tinyxml2::XMLElement* c = eq->FirstChildElement("connect");
+        while (c)
+        {
+            MJCFEqualityConnect* equalityConnect = new MJCFEqualityConnect();
+            LoadEqualityConnect(c, equalityConnect);
+            equalityConnects.push_back(equalityConnect);
+            c = c->NextSiblingElement("connect");
+        }
+        eq = eq->NextSiblingElement("equality");
+    }
     tinyxml2::XMLElement* cc = root->FirstChildElement("contact");
     while (cc)
     {

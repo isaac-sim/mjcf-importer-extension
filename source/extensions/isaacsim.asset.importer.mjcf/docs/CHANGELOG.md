@@ -1,4 +1,10 @@
 # Changelog
+## [2.3.5] - 2025-02-13
+### Added
+- Support for equality constraints
+### Fixed
+- Fixed bug where multiple tendons to the same joint pair were overriding each other.
+- Fixed appropriate conversion of tendon properties to USD.
 
 ## [2.3.4] - 2025-01-28
 ### Fixed

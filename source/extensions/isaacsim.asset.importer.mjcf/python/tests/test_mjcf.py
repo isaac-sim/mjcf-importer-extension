@@ -212,7 +212,7 @@ class TestMJCF(omni.kit.test.AsyncTestCase):
         )
         await omni.kit.app.get_app().next_update_async()
 
-        prim = stage.GetPrimAtPath("/ant/torso")
+        prim = stage.GetPrimAtPath("/ant/torso/torso")
         self.assertNotEqual(prim.GetPath(), Sdf.Path.emptyPath)
         self.assertEqual(prim.GetAttribute("physxArticulation:enabledSelfCollisions").Get(), True)
 

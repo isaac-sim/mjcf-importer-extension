@@ -46,6 +46,14 @@ struct ContactNode
     std::set<int> adjacentNodes;
 };
 
+struct MJCFEqualityConnect
+{
+public:
+    std::string body1;
+    std::string body2;
+    Vec3 anchor;
+};
+
 class MJCFJoint
 {
 public:
