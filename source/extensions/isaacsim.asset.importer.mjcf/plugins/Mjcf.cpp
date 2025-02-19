@@ -166,21 +166,25 @@ void createAssetFromMJCF(const char* fileName,
     if (multi_layer)
     {
         auto subLayerPaths = rootLayer->GetSubLayerPaths();
-        if (std::find(subLayerPaths.begin(), subLayerPaths.end(),
-                      stages["sensor_stage"]->GetRootLayer()->GetIdentifier()) == subLayerPaths.end())
+        auto sensor_layer = resolve_relative(
+            stages["stage"]->GetRootLayer()->GetIdentifier(), stages["sensor_stage"]->GetRootLayer()->GetIdentifier());
+        if (std::find(subLayerPaths.begin(), subLayerPaths.end(), sensor_layer) == subLayerPaths.end())
         {
-            subLayerPaths.push_back(stages["sensor_stage"]->GetRootLayer()->GetIdentifier());
+            subLayerPaths.push_back(sensor_layer);
         }
-        if (std::find(subLayerPaths.begin(), subLayerPaths.end(),
-                      stages["physics_stage"]->GetRootLayer()->GetIdentifier()) == subLayerPaths.end())
+        auto physics_layer = resolve_relative(
+            stages["stage"]->GetRootLayer()->GetIdentifier(), stages["physics_stage"]->GetRootLayer()->GetIdentifier());
+        if (std::find(subLayerPaths.begin(), subLayerPaths.end(), physics_layer) == subLayerPaths.end())
         {
-            subLayerPaths.push_back(stages["physics_stage"]->GetRootLayer()->GetIdentifier());
+            subLayerPaths.push_back(physics_layer);
         }
         auto physics_subLayerPaths = stages["physics_stage"]->GetRootLayer()->GetSubLayerPaths();
-        if (std::find(physics_subLayerPaths.begin(), physics_subLayerPaths.end(),
-                      stages["base_stage"]->GetRootLayer()->GetIdentifier()) == physics_subLayerPaths.end())
+        auto base_layer = resolve_relative(stages["physics_stage"]->GetRootLayer()->GetIdentifier(),
+                                           stages["base_stage"]->GetRootLayer()->GetIdentifier());
+        if (std::find(physics_subLayerPaths.begin(), physics_subLayerPaths.end(), base_layer) ==
+            physics_subLayerPaths.end())
         {
-            physics_subLayerPaths.push_back(stages["base_stage"]->GetRootLayer()->GetIdentifier());
+            physics_subLayerPaths.push_back(base_layer);
         }
     }
     std::string result = "";

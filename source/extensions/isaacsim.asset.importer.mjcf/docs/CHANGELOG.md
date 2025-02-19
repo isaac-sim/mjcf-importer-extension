@@ -1,4 +1,8 @@
 # Changelog
+## [2.3.6] - 2025-02-19
+### Fixed
+- Relative path for sublayers
+
 ## [2.3.5] - 2025-02-13
 ### Added
 - Support for equality constraints
