@@ -9,6 +9,7 @@ keywords = ["app"]
 "omni.usd.schema.physx" = {}
 "isaacsim.asset.importer.mjcf" = {}
 "omni.importer.mjcf" = {}
+"omni.physx.bundle" = {}
 
 [settings]
 app.window.title = "MJCF Importer Application"
@@ -28,3 +29,10 @@ app.primCreation.typedDefaults.camera.clippingRange = [0.01, 10000000.0]
 [settings.persistent.app.stage]
 upAxis = "Z"
 materialStrength = "weakerThanDescendants"
+
+[[test]]
+enabled = false
+args = [
+	"--/app/file/ignoreUnsavedOnExit=true",
+	'--/persistent/app/stage/upAxis="Z"'
+]
