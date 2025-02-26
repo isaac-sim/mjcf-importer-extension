@@ -6,10 +6,9 @@ keywords = ["app"]
 
 [dependencies]
 "omni.app.dev" = {}
-"omni.usd.schema.physx" = {}
+"omni.physx.bundle" = {version="106.5.7"} #fixing version to match the usd_ext_physics package dep.
 "isaacsim.asset.importer.mjcf" = {}
 "omni.importer.mjcf" = {}
-"omni.physx.bundle" = {}
 
 [settings]
 app.window.title = "MJCF Importer Application"
@@ -25,6 +24,7 @@ folders.'++' = [
 
 [settings.persistent]
 app.primCreation.typedDefaults.camera.clippingRange = [0.01, 10000000.0]
+simulation.defaultMetersPerUnit = 1.0 # Meters default
 
 [settings.persistent.app.stage]
 upAxis = "Z"
