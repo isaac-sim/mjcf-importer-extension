@@ -128,6 +128,7 @@ class Extension(omni.ext.IExt):
         self._config.set_make_default_prim(True)
         self._config.set_create_physics_scene(True)
         self._config.set_import_sites(True)
+        self._config.set_isaaclab(False)
         self._config.set_visualize_collision_geoms(False)
 
     def build_ui(self):

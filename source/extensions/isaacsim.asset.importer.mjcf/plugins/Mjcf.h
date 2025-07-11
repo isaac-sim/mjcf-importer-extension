@@ -49,6 +49,7 @@ struct ImportConfig
     bool overrideInertia = false;
     bool visualizeCollisionGeoms = false;
     bool importSites = true;
+    bool isaaclab = false;
 
     bool makeInstanceable = false;
     std::string instanceableMeshUsdPath = "./instanceable_meshes.usd";

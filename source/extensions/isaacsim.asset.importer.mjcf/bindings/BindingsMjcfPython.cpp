@@ -129,7 +129,10 @@ PYBIND11_MODULE(_mjcf, m)
              [](ImportConfig& config, const std::string value) { config.instanceableMeshUsdPath = value; })
         .def("set_visualize_collision_geoms",
              [](ImportConfig& config, const bool value) { config.visualizeCollisionGeoms = value; })
-        .def("set_import_sites", [](ImportConfig& config, const bool value) { config.importSites = value; });
+        .def("set_import_sites",
+             [](ImportConfig& config, const bool value) { config.importSites = value; })
+        .def("set_isaaclab",
+             [](ImportConfig& config, const bool value) { config.isaaclab = value; });
 
     defineInterfaceClass<Mjcf>(m, "Mjcf", "acquire_mjcf_interface", "release_mjcf_interface")
         .def("create_asset_mjcf", wrapInterfaceFunction(&Mjcf::createAssetFromMJCF), py::arg("fileName"),
