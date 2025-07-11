@@ -280,7 +280,6 @@ bool MJCFImporter::AddPhysicsEntities(std::unordered_map<std::string, pxr::UsdSt
     std::string instanceableUSDPath = config.instanceableMeshUsdPath;
     for (int i = 0; i < (int)bodies.size(); i++)
     {
-        // COMMENTED THIS
         if (!config.isaaclab)
         {
             std::string rootArtPrimPath = rootPrimPath + "/" + SanitizeUsdName(bodies[i]->name);
