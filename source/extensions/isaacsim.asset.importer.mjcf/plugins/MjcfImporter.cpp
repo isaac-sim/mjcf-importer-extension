@@ -294,7 +294,8 @@ bool MJCFImporter::AddPhysicsEntities(std::unordered_map<std::string, pxr::UsdSt
         AddContactFilters(stages["stage"]);
         AddTendons(stages["stage"], rootPrimPath);
 
-        addWorldGeomsAndSites(stages, rootPrimPath, config, instanceableUSDPath);
+        // COMMENTED THIS
+        // addWorldGeomsAndSites(stages, rootPrimPath, config, instanceableUSDPath);
     }
     std::vector<JointDefinition> jointDefinitions = analyzeConstraints(equalityConnects);
     for (const auto& jointDef : jointDefinitions)
