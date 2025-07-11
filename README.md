@@ -16,4 +16,4 @@ by searching for `isaacsim.asset.importer.mjcf`.
 
 **Note:** On Linux, replace `.bat` with `.sh` in the instructions above.
 
-For additional information, check [MJCF Importer Extension Documentation](https://docs.isaacsim.omniverse.nvidia.com/latest/robot_setup/ext_isaacsim_asset_importer_mjcf.html).
+For additional information, check [MJCF Importer Extension Documentation](https://docs.isaacsim.omniverse.nvidia.com/latest/importer_exporter/ext_isaacsim_asset_importer_mjcf.html).
