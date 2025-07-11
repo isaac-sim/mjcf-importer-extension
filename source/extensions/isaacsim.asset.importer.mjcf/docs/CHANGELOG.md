@@ -1,8 +1,4 @@
 # Changelog
-## [2.3.7] - 2025-07-11
-### Fixed
-- Provides an option in UI to make a model Isaac Lab compatible.
-
 ## [2.3.6] - 2025-02-19
 ### Fixed
 - Relative path for sublayers
