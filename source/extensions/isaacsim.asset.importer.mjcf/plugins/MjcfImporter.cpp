@@ -280,10 +280,13 @@ bool MJCFImporter::AddPhysicsEntities(std::unordered_map<std::string, pxr::UsdSt
     std::string instanceableUSDPath = config.instanceableMeshUsdPath;
     for (int i = 0; i < (int)bodies.size(); i++)
     {
-        std::string rootArtPrimPath = rootPrimPath + "/" + SanitizeUsdName(bodies[i]->name);
-        pxr::UsdGeomXform rootArtPrim = pxr::UsdGeomXform::Define(stages["base_stage"], pxr::SdfPath(rootArtPrimPath));
+        // COMMENTED THIS
+        // std::string rootArtPrimPath = rootPrimPath + "/" + SanitizeUsdName(bodies[i]->name);
+        // pxr::UsdGeomXform rootArtPrim = pxr::UsdGeomXform::Define(stages["base_stage"], pxr::SdfPath(rootArtPrimPath));
 
         CreatePhysicsBodyAndJoint(
+            // COMMENTED THIS
+            // stages, bodies[i], rootPrimPath, rootPrimPath, trans, true, rootPrimPath, config, instanceableUSDPath);
             stages, bodies[i], rootPrimPath, rootArtPrimPath, trans, true, rootPrimPath, config, instanceableUSDPath);
     }
     {
