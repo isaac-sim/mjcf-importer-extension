@@ -280,18 +280,28 @@ bool MJCFImporter::AddPhysicsEntities(std::unordered_map<std::string, pxr::UsdSt
     std::string instanceableUSDPath = config.instanceableMeshUsdPath;
     for (int i = 0; i < (int)bodies.size(); i++)
     {
-        std::string rootArtPrimPath = rootPrimPath + "/" + SanitizeUsdName(bodies[i]->name);
-        pxr::UsdGeomXform rootArtPrim = pxr::UsdGeomXform::Define(stages["base_stage"], pxr::SdfPath(rootArtPrimPath));
-
-        CreatePhysicsBodyAndJoint(
-            stages, bodies[i], rootPrimPath, rootArtPrimPath, trans, true, rootPrimPath, config, instanceableUSDPath);
+        if (!config.isaaclab)
+        {
+            std::string rootArtPrimPath = rootPrimPath + "/" + SanitizeUsdName(bodies[i]->name);
+            pxr::UsdGeomXform rootArtPrim = pxr::UsdGeomXform::Define(stages["base_stage"], pxr::SdfPath(rootArtPrimPath));
+            CreatePhysicsBodyAndJoint(
+                stages, bodies[i], rootPrimPath, rootArtPrimPath, trans, true, rootPrimPath, config, instanceableUSDPath);
+        }
+        else
+        {
+            CreatePhysicsBodyAndJoint(
+                stages, bodies[i], rootPrimPath, rootPrimPath, trans, true, rootPrimPath, config, instanceableUSDPath);
+        }
     }
     {
         pxr::UsdEditContext context(stages["stage"], stages["physics_stage"]->GetRootLayer());
         AddContactFilters(stages["stage"]);
         AddTendons(stages["stage"], rootPrimPath);
 
-        addWorldGeomsAndSites(stages, rootPrimPath, config, instanceableUSDPath);
+        if (!config.isaaclab)
+        {
+            addWorldGeomsAndSites(stages, rootPrimPath, config, instanceableUSDPath);
+        }
     }
     std::vector<JointDefinition> jointDefinitions = analyzeConstraints(equalityConnects);
     for (const auto& jointDef : jointDefinitions)

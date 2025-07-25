@@ -234,6 +234,12 @@ class OptionWidget:
                     default_val=True,
                     on_clicked_fn=lambda m, config=self._config: config.set_import_sites(m),
                 )
+                checkbox_builder(
+                    "Create for Isaac Lab",
+                    tooltip="If True, the structure of the USD will be Isaac Lab compatible.",
+                    default_val=False,
+                    on_clicked_fn=lambda m, config=self._config: config.set_isaaclab(m),
+                )
 
         option_frame("Model", build_model_content)
 
